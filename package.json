@@ -6,8 +6,9 @@
   "description": "前端监控SDK，可用来收集并上报：代码错误、性能数据、用户行为、加载资源、个性化指标等数据",
   "main": "index.js",
   "scripts": {
+    "test": "",
     "build": "rollup -c",
-    "prepare": "husky install",
+    "prepare": "husky",
     "commit": "git-cz",
     "changeset": "changeset",
     "version-packages": "changeset version",
@@ -56,5 +57,10 @@
     "tslib": "^2.8.1",
     "ua-parser-js": "^2.0.2",
     "web-vitals": "^4.2.4"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   }
 }
