@@ -40,7 +40,6 @@
     "lint-staged": "^15.4.3",
     "prettier": "3.5.2",
     "rollup": "^4.34.9",
-    "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.25.0"
   },
@@ -53,7 +52,10 @@
     "web-vitals": "^4.2.4"
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*.{ts,tsx,json}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "config": {
     "commitizen": {
