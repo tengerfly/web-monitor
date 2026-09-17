@@ -3,7 +3,7 @@
 > 一次部署，后续所有前端项目「改配置即可接入」。
 > **性能监控与用户行为追踪物理分离、按需引入**；错误与问题溯源作为独立能力包，用 `traceId + sessionId` 把四类数据串联起来。
 
-[![CI](https://github.com/USER/web-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/web-monitor/actions/workflows/ci.yml)
+[![CI](https://github.com/tengerfly/web-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/tengerfly/web-monitor/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 ---
