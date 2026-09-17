@@ -1,0 +1,45 @@
+{
+  "name": "@web-monitor/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "web-monitor 服务端：上报网关、聚合查询、SourceMap 还原与告警",
+  "license": "MIT",
+  "scripts": {
+    "build": "prisma generate && nest build",
+    "dev": "prisma generate && nest start --watch",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "ts-node -P tsconfig.json prisma/seed.ts",
+    "clickhouse:init": "ts-node -P tsconfig.json scripts/init-clickhouse.ts",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.9.0",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/throttler": "^6.3.0",
+    "@prisma/client": "^6.2.1",
+    "@web-monitor/types": "workspace:*",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "nodemailer": "^6.9.16",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "source-map-js": "^1.2.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "@types/nodemailer": "^6.4.17",
+    "prisma": "^6.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

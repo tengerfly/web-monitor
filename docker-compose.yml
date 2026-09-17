@@ -1,0 +1,60 @@
+# 本地开发依赖：PostgreSQL（业务实体）+ ClickHouse（海量事件）
+#   pnpm infra:up    启动
+#   pnpm infra:down  停止
+# 可选：mailhog 用于本地验证邮件告警（docker compose --profile mail up -d）
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: wm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wm
+      POSTGRES_PASSWORD: wm_password
+      POSTGRES_DB: web_monitor
+      TZ: Asia/Shanghai
+    ports:
+      - '5432:5432'
+    volumes:
+      - wm-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U wm -d web_monitor']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    container_name: wm-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: wm_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      TZ: Asia/Shanghai
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - wm-ch-data:/var/lib/clickhouse
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8123/ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: wm-mailhog
+    profiles: ['mail']
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+volumes:
+  wm-pg-data:
+  wm-ch-data:

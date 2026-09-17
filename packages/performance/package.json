@@ -1,0 +1,34 @@
+{
+  "name": "@web-monitor/performance",
+  "version": "0.1.0",
+  "description": "web-monitor 性能监控：Core Web Vitals、加载阶段拆解、资源/接口耗时、长任务与卡顿、白屏检测",
+  "license": "MIT",
+  "keywords": ["monitor", "performance", "web-vitals", "lcp", "cls", "inp"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.min.js",
+  "jsdelivr": "./dist/index.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "dependencies": {
+    "@web-monitor/core": "workspace:*",
+    "@web-monitor/types": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

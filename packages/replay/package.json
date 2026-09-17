@@ -1,0 +1,34 @@
+{
+  "name": "@web-monitor/replay",
+  "version": "0.1.0",
+  "description": "web-monitor 会话回放：DOM 快照录制 + 增量变更 + 轻量播放器（数据结构兼容 rrweb）",
+  "license": "MIT",
+  "keywords": ["monitor", "replay", "session-replay", "rrweb", "dom"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.min.js",
+  "jsdelivr": "./dist/index.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "dependencies": {
+    "@web-monitor/core": "workspace:*",
+    "@web-monitor/types": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

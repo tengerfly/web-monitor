@@ -1,0 +1,114 @@
+:root {
+  --wm-page-padding: 20px;
+  --wm-card-radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.wm-page {
+  padding: var(--wm-page-padding);
+}
+
+.wm-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.wm-page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.wm-page-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #8a9099;
+}
+
+.wm-section {
+  margin-bottom: 16px;
+}
+
+.wm-stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #1f2329;
+}
+
+.wm-stat-unit {
+  font-size: 12px;
+  margin-left: 4px;
+  color: #8a9099;
+}
+
+.wm-stat-label {
+  font-size: 13px;
+  color: #646a73;
+}
+
+.wm-code-block {
+  background: #f7f8fa;
+  border: 1px solid #e5e6eb;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.wm-code-line {
+  display: flex;
+  gap: 12px;
+}
+
+.wm-code-line-error {
+  background: #fff1f0;
+  border-left: 3px solid #f5222d;
+  margin-left: -3px;
+}
+
+.wm-line-number {
+  min-width: 42px;
+  text-align: right;
+  color: #a8abb2;
+  user-select: none;
+}
+
+.wm-breadcrumb-row {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #f0f1f2;
+  font-size: 13px;
+}
+
+.wm-breadcrumb-time {
+  min-width: 92px;
+  color: #a8abb2;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+}
+
+.wm-replay-container {
+  width: 100%;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.wm-empty {
+  padding: 48px 0;
+}

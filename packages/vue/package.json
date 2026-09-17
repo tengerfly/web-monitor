@@ -1,0 +1,38 @@
+{
+  "name": "@web-monitor/vue",
+  "version": "0.1.0",
+  "description": "web-monitor Vue 3 适配：插件安装、错误接管、路由埋点与组合式 API",
+  "license": "MIT",
+  "keywords": ["monitor", "vue", "vue3", "error-handler", "composable"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "dependencies": {
+    "@web-monitor/core": "workspace:*",
+    "@web-monitor/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.13"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

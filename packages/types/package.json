@@ -1,0 +1,30 @@
+{
+  "name": "@web-monitor/types",
+  "version": "0.1.0",
+  "description": "web-monitor 上报协议类型、枚举与查询契约（SDK / 服务端 / 看板唯一定义源）",
+  "license": "MIT",
+  "keywords": ["monitor", "types", "protocol", "observability"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.min.js",
+  "jsdelivr": "./dist/index.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('no tests for types package')\""
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

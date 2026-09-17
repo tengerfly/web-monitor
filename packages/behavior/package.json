@@ -1,0 +1,34 @@
+{
+  "name": "@web-monitor/behavior",
+  "version": "0.1.0",
+  "description": "web-monitor 用户行为追踪：PV/UV、路由、点击、曝光、滚动、表单、自定义埋点与用户路径",
+  "license": "MIT",
+  "keywords": ["monitor", "behavior", "track", "analytics", "exposure"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.min.js",
+  "jsdelivr": "./dist/index.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "dependencies": {
+    "@web-monitor/core": "workspace:*",
+    "@web-monitor/types": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

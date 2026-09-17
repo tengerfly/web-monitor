@@ -1,0 +1,34 @@
+{
+  "name": "@web-monitor/error",
+  "version": "0.1.0",
+  "description": "web-monitor 错误监控与问题溯源：错误聚合指纹、行为轨迹快照、接口调用链、现场快照",
+  "license": "MIT",
+  "keywords": ["monitor", "error", "sentry", "trace", "sourcemap"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.min.js",
+  "jsdelivr": "./dist/index.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('no tests yet')\""
+  },
+  "dependencies": {
+    "@web-monitor/core": "workspace:*",
+    "@web-monitor/types": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web-monitor 联调示例</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: #f5f7fa;
+        color: #1f2329;
+      }
+      header {
+        background: #fff;
+        border-bottom: 1px solid #f0f1f2;
+        padding: 16px 24px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      header h1 { margin: 0; font-size: 18px; }
+      header p { margin: 4px 0 0; font-size: 13px; color: #8a9099; }
+      nav { display: flex; gap: 8px; margin-top: 12px; }
+      nav a {
+        padding: 4px 12px;
+        border-radius: 4px;
+        background: #f2f3f5;
+        color: #1f2329;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      nav a:hover { background: #e5e6eb; }
+      main { padding: 24px; max-width: 1080px; margin: 0 auto; }
+      section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      h2 { font-size: 15px; margin: 0 0 12px; }
+      button {
+        padding: 6px 14px;
+        border-radius: 4px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        cursor: pointer;
+        margin: 0 8px 8px 0;
+        font-size: 13px;
+      }
+      button:hover { border-color: #1677ff; color: #1677ff; }
+      button.primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+      button.danger { border-color: #ffa39e; color: #cf1322; }
+      .banner {
+        height: 90px;
+        background: linear-gradient(90deg, #1677ff, #69b1ff);
+        border-radius: 6px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+      }
+      .tall { height: 900px; background: #fafafa; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #bfbfbf; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .card { flex: 1; min-width: 180px; border: 1px solid #f0f1f2; border-radius: 6px; padding: 12px; }
+      input, select { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+      #log {
+        background: #1f2329;
+        color: #b7eb8f;
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 12px;
+        padding: 12px;
+        border-radius: 6px;
+        height: 180px;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+      .sensitive { border: 2px dashed #ffa39e; padding: 10px; border-radius: 6px; }
+      .ad-banner { background: #fff7e6; border: 1px dashed #ffd591; padding: 10px; border-radius: 6px; }
+      .slow-resource { width: 1px; height: 1px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>web-monitor 联调示例</h1>
+      <p>点击下方按钮可分别触发性能、行为、错误与回放数据，随后打开看板验证</p>
+      <nav>
+        <a href="#perf">性能</a>
+        <a href="#behavior">行为</a>
+        <a href="#error">错误</a>
+        <a href="#api">接口</a>
+        <a href="#form">表单</a>
+      </nav>
+    </header>
+    <main>
+      <section id="perf">
+        <h2>1. 性能与资源</h2>
+        <div class="banner">首屏大图占位（LCP 候选元素）</div>
+        <button onclick="window.__demo.slowRequest()">模拟慢接口（2s）</button>
+        <button onclick="window.__demo.loadSlowImage()">加载慢图片</button>
+        <button onclick="window.__demo.blockMainThread()">制造长任务（阻塞主线程 600ms）</button>
+      </section>
+
+      <section id="behavior">
+        <h2>2. 用户行为与曝光</h2>
+        <div class="row">
+          <div class="card banner-card" data-track="hero-banner">曝光目标：banner</div>
+          <div class="card">
+            <button class="primary" data-track="buy-now">加入购物车（自定义埋点）</button>
+            <button onclick="window.__demo.trackCustom()">自定义事件 track()</button>
+          </div>
+        </div>
+        <div class="tall">向下滚动以采集滚动深度</div>
+      </section>
+
+      <section id="error">
+        <h2>3. 错误与溯源</h2>
+        <button class="danger" onclick="window.__demo.throwSync()">抛出同步错误</button>
+        <button class="danger" onclick="window.__demo.throwAsync()">抛出未捕获 Promise 错误</button>
+        <button class="danger" onclick="window.__demo.throwAfterClicks()">连续操作后报错（观察行为轨迹）</button>
+        <button onclick="window.__demo.loadMissingImage()">加载不存在的图片（资源错误）</button>
+        <p style="font-size: 13px; color: #8a9099; margin-top: 8px">
+          「连续操作后报错」会先执行若干点击、埋点与接口请求，再抛错——用于验证错误详情里的行为轨迹与接口调用链。
+        </p>
+      </section>
+
+      <section id="api">
+        <h2>4. 接口错误</h2>
+        <button onclick="window.__demo.request404()">请求 404</button>
+        <button onclick="window.__demo.request500()">请求 500</button>
+        <button onclick="window.__demo.requestBusinessError()">业务错误码（HTTP 200 + code 500）</button>
+      </section>
+
+      <section id="form">
+        <h2>5. 表单与隐私遮罩</h2>
+        <div class="row">
+          <div class="card">
+            <input name="username" placeholder="用户名（普通字段）" />
+          </div>
+          <div class="card">
+            <input type="password" name="password" placeholder="密码（自动遮罩）" />
+          </div>
+          <div class="card sensitive" data-wm-mask>
+            <input name="idCard" placeholder="身份证（自定义遮罩区域）" />
+          </div>
+          <div class="card ad-banner" data-wm-ignore>
+            <input name="adInput" placeholder="广告区域（不采集）" />
+          </div>
+        </div>
+        <button class="primary" onclick="window.__demo.submitForm()">提交表单</button>
+      </section>
+
+      <section>
+        <h2>6. 监控事件日志（本地）</h2>
+        <div id="log"></div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

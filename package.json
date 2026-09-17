@@ -1,0 +1,61 @@
+{
+  "name": "web-monitor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "企业级前端监控基建：性能监控 · 用户行为追踪 · 问题溯源（SDK + 上报服务端 + 可视化看板）",
+  "packageManager": "pnpm@11.3.0",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "build": "pnpm run build:packages && pnpm run build:apps",
+    "build:packages": "pnpm -r --filter \"./packages/*\" run build",
+    "build:apps": "pnpm run build:server && pnpm run build:dashboard",
+    "build:server": "pnpm --filter @web-monitor/server run build",
+    "build:dashboard": "pnpm --filter @web-monitor/dashboard run build",
+    "dev:server": "pnpm --filter @web-monitor/server run dev",
+    "dev:dashboard": "pnpm --filter @web-monitor/dashboard run dev",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r exec rimraf dist coverage",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "db:generate": "pnpm --filter @web-monitor/server run prisma:generate",
+    "db:migrate": "pnpm --filter @web-monitor/server run prisma:migrate",
+    "db:seed": "pnpm --filter @web-monitor/server run prisma:seed",
+    "db:ch": "pnpm --filter @web-monitor/server run clickhouse:init",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm run build:packages && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9",
+    "@eslint/js": "^9.14.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.1",
+    "@types/node": "^22.9.0",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.24.4",
+    "rollup-plugin-dts": "^6.1.1",
+    "tslib": "^2.8.1",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "printWidth": 100,
+    "trailingComma": "all",
+    "arrowParens": "always",
+    "endOfLine": "lf"
+  }
+}

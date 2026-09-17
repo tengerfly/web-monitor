@@ -1,0 +1,137 @@
+// web-monitor PostgreSQL 数据模型
+// 定位：承载「业务实体与聚合」，海量事件明细与统计聚合由 ClickHouse 承担。
+// 设计原则：不做跨库 JOIN，PG 与 CH 通过 appKey / sessionId / fingerprint 在应用层关联。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// 接入应用（多租户的基本单位）
+model Project {
+  id            String   @id @default(cuid())
+  appKey        String   @unique
+  name          String
+  description   String?
+  /// 支持的环境列表
+  envs          String[] @default(["production"])
+  /// 全局采样率（远程配置下发）
+  sampleRate    Float    @default(1)
+  /// 各能力包开关
+  plugins       Json     @default("{\"performance\":true,\"behavior\":true,\"error\":true,\"replay\":false}")
+  /// 各能力包的细粒度配置（阈值、采样率等）
+  pluginConfig  Json     @default("{}")
+  /// 脱敏规则
+  maskRules     Json     @default("{}")
+  /// 数据保留天数（提示用，实际清理由 ClickHouse TTL 执行）
+  retentionDays Int      @default(90)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  errorGroups ErrorGroup[]
+  sourceMaps  SourceMap[]
+  alertRules  AlertRule[]
+
+  @@map("projects")
+}
+
+/// 错误分组（按指纹聚合）
+/// 精确的影响用户数 / 趋势来自 ClickHouse，本表承载状态流转与元信息
+model ErrorGroup {
+  id          String   @id @default(cuid())
+  appKey      String
+  fingerprint String
+  name        String   @default("Error")
+  message     String   @db.Text
+  category    String
+  level       String   @default("error")
+  /// pending | resolved | ignored
+  status      String   @default("pending")
+  /// 累计出现次数（由上报链路自增）
+  count       Int      @default(0)
+  appVersions String[] @default([])
+  pages       String[] @default([])
+  assignee    String?
+  note        String?  @db.Text
+  firstSeen   DateTime @default(now())
+  lastSeen    DateTime @default(now())
+
+  project Project @relation(fields: [appKey], references: [appKey], onDelete: Cascade)
+
+  @@unique([appKey, fingerprint])
+  @@index([appKey, lastSeen])
+  @@map("error_groups")
+}
+
+/// SourceMap 文件（用于压缩堆栈还原）
+model SourceMap {
+  id         String   @id @default(cuid())
+  appKey     String
+  appVersion String
+  fileName   String
+  content    String   @db.Text
+  size       Int
+  createdAt  DateTime @default(now())
+
+  project Project @relation(fields: [appKey], references: [appKey], onDelete: Cascade)
+
+  @@unique([appKey, appVersion, fileName])
+  @@index([appKey, appVersion])
+  @@map("source_maps")
+}
+
+/// 告警规则
+model AlertRule {
+  id        String   @id @default(cuid())
+  appKey    String
+  name      String
+  enabled   Boolean  @default(true)
+  /// error_count | error_rate | affected_users | new_error | p95_latency | api_error_rate | lcp_p75 | white_screen | slow_api_count
+  metric    String
+  /// gt | gte | lt | lte
+  operator  String
+  threshold Float
+  /// 统计窗口（分钟）
+  window    Int
+  /// 静默期（分钟）
+  silence   Int      @default(30)
+  /// 最小触发样本量
+  minCount  Int      @default(1)
+  /// 通知渠道
+  channels  Json     @default("[]")
+  /// 过滤条件（页面 / 版本 / 环境）
+  filter    Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project       @relation(fields: [appKey], references: [appKey], onDelete: Cascade)
+  records AlertRecord[]
+
+  @@index([appKey, enabled])
+  @@map("alert_rules")
+}
+
+/// 告警触发记录
+model AlertRecord {
+  id          String    @id @default(cuid())
+  ruleId      String
+  appKey      String
+  metric      String
+  value       Float
+  threshold   Float
+  /// firing | resolved
+  status      String    @default("firing")
+  notified    Boolean   @default(false)
+  message     String    @db.Text
+  triggeredAt DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  rule AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([appKey, triggeredAt])
+  @@map("alert_records")
+}
