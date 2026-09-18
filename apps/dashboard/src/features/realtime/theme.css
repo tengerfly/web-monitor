@@ -1,0 +1,73 @@
+/**
+ * 实时大屏主题 token（视觉唯一来源：.spec/设计稿/design-system.md §7，共 34 条）。
+ * 深色仅作用于 .realtime-screen 容器作用域，不影响看板其余浅色页面。
+ * 与 FTDD D5 对账：条数 34，开发期不得增删值。
+ */
+.realtime-screen {
+  /* 1-4 主色 */
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-primary-subtle: rgba(96, 165, 250, 0.12);
+  --color-accent: #22d3ee;
+  /* 5-7 背景/面板 */
+  --color-bg: #0a0f1e;
+  --color-surface: #101828;
+  --color-surface-2: #16203a;
+  /* 8-11 文字与描边 */
+  --color-text: #e8effb;
+  --color-text-secondary: #7d8ca6;
+  --color-text-tertiary: #55617a;
+  --color-border: #1e2a45;
+  /* 12-17 语义色 */
+  --color-success: #4ade80;
+  --color-success-subtle: rgba(74, 222, 128, 0.12);
+  --color-warning: #facc15;
+  --color-warning-subtle: rgba(250, 204, 21, 0.1);
+  --color-danger: #f87171;
+  --color-danger-subtle: rgba(248, 113, 113, 0.12);
+  /* 18-19 信息色 */
+  --color-info: #60a5fa;
+  --color-info-subtle: rgba(96, 165, 250, 0.12);
+  /* 20-25 字体 */
+  --font-number: 700 40px/1.1 var(--font-family);
+  --font-h1: 600 22px/1.3 var(--font-family);
+  --font-h2: 600 15px/1.4 var(--font-family);
+  --font-h3: 600 13px/1.4 var(--font-family);
+  --font-body: 400 14px/1.6 var(--font-family);
+  --font-caption: 400 12px/1.5 var(--font-family);
+  /* 26 字体族 */
+  --font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  /* 27 间距 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+  /* 28-29 圆角与阴影 */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 999px;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.45);
+  /* 31-33 动效 */
+  --motion-fade: 200ms ease-out;
+  --motion-curve: 300ms ease;
+  --motion-hover: 150ms;
+
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 14px;
+  min-height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .realtime-screen * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

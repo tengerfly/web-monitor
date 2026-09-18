@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Layout, Menu, Select, Space, Tag, Typography, DatePicker, Button, Tooltip } from 'antd';
 import {
   AlertOutlined,
+  DotChartOutlined,
   ApiOutlined,
   AreaChartOutlined,
   BarsOutlined,
@@ -22,6 +23,7 @@ const { Header, Sider, Content } = Layout;
 
 const MENU_ITEMS = [
   { key: '/overview', icon: <DashboardOutlined />, label: <Link to="/overview">总览</Link> },
+  { key: '/realtime', icon: <DotChartOutlined />, label: <Link to="/realtime">实时大屏</Link> },
   { key: '/performance', icon: <AreaChartOutlined />, label: <Link to="/performance">性能分析</Link> },
   { key: '/errors', icon: <BugOutlined />, label: <Link to="/errors">错误与溯源</Link> },
   { key: '/behavior', icon: <BarsOutlined />, label: <Link to="/behavior">用户行为</Link> },

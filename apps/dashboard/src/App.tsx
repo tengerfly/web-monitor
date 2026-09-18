@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 import Overview from './pages/Overview';
+import RealtimePage from './pages/RealtimePage';
 import Performance from './pages/Performance';
 import Errors from './pages/Errors';
 import ErrorDetail from './pages/ErrorDetail';
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/" element={<AppLayout />}>
         <Route index element={<Navigate to="/overview" replace />} />
         <Route path="overview" element={<Overview />} />
+        <Route path="realtime" element={<RealtimePage />} />
         <Route path="performance" element={<Performance />} />
         <Route path="errors" element={<Errors />} />
         <Route path="errors/:id" element={<ErrorDetail />} />
