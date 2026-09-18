@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>风格方案色板小样 — 实时大屏</title>
+<style>
+body { font-family: "PingFang SC","Microsoft YaHei",sans-serif; background:#f5f5f6; color:#1f1f1f; margin:0; padding:24px; }
+h1 { font-size:16px; margin-bottom:4px; }
+.sub { color:#6b6b6b; font-size:12px; margin-bottom:18px; }
+.proposal { border-radius:8px; overflow:hidden; margin-bottom:20px; border:1px solid #ddd; }
+.phead { display:flex; align-items:baseline; gap:12px; padding:10px 16px; font-size:13px; }
+.phead b { font-size:14px; }
+.swatches { display:flex; }
+.sw { flex:1; height:52px; display:flex; align-items:flex-end; padding:6px 8px; font-size:11px; box-sizing:border-box; }
+.sample { padding:16px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.sample .num { font-size:30px; font-weight:700; }
+.sample .label { font-size:12px; }
+.btn { padding:7px 14px; border-radius:4px; font-size:13px; display:inline-block; }
+.stack { display:flex; flex-direction:column; gap:6px; }
+.t1 { font-size:16px; font-weight:600; } .t2 { font-size:13px; } .t3 { font-size:11px; }
+</style>
+</head>
+<body>
+<h1>风格方案色板小样（零额度文字通道）</h1>
+<div class="sub">web-monitor 实时大屏 · 三方案并排对比 · 选定后按所选方案展开设计规范</div>
+
+<!-- 方案 A -->
+<div class="proposal" style="background:#0B1220; color:#E6EDF7;">
+  <div class="phead" style="color:#8B99B0;"><b style="color:#E6EDF7;">方案 A · 中控青绿</b><span>深海军 #0B1220 · 主色青绿 · 紧凑 · 4px · 克制流动</span></div>
+  <div class="swatches">
+    <div class="sw" style="background:#0B1220;">背景 #0B1220</div>
+    <div class="sw" style="background:#111A2C;">面板 #111A2C</div>
+    <div class="sw" style="background:#2DD4BF; color:#06251F;">主色 #2DD4BF</div>
+    <div class="sw" style="background:#34D399; color:#06251F;">成功</div>
+    <div class="sw" style="background:#FBBF24; color:#3A2A02;">警告</div>
+    <div class="sw" style="background:#F87171; color:#3D0606;">危险</div>
+  </div>
+  <div class="sample">
+    <div><div class="num" style="color:#2DD4BF;">12,847</div><div class="label" style="color:#8B99B0;">当日 PV</div></div>
+    <div><div class="num" style="color:#F87171;">0.18%</div><div class="label" style="color:#8B99B0;">错误率（醒目）</div></div>
+    <div class="stack"><span class="t1">错误滚动流 · 最新 50 条（倒序）</span><span class="t2">TypeError: Cannot read properties of undefined (reading 'total')</span><span class="t3" style="color:#8B99B0;">页面 /order/confirm · 今天 14:30</span></div>
+    <span class="btn" style="background:#2DD4BF; color:#06251F;">主按钮</span>
+    <span class="btn" style="border:1px solid #2DD4BF; color:#2DD4BF;">次按钮</span>
+  </div>
+</div>
+
+<!-- 方案 B -->
+<div class="proposal" style="background:#121014; color:#F2EEE6;">
+  <div class="phead" style="color:#9A937F;"><b style="color:#F2EEE6;">方案 B · 曜石琥珀</b><span>曜石 #121014 · 主色琥珀 · 高密直角 · 静态仪表</span></div>
+  <div class="swatches">
+    <div class="sw" style="background:#121014;">背景 #121014</div>
+    <div class="sw" style="background:#1A1720;">面板 #1A1720</div>
+    <div class="sw" style="background:#F59E0B; color:#2E1D02;">主色 #F59E0B</div>
+    <div class="sw" style="background:#A3E635; color:#1E2603;">成功</div>
+    <div class="sw" style="background:#FBBF24; color:#3A2A02;">警告</div>
+    <div class="sw" style="background:#FB7185; color:#3D0713;">危险</div>
+  </div>
+  <div class="sample" style="font-family:'JetBrains Mono',Consolas,monospace;">
+    <div><div class="num" style="color:#F59E0B;">12,847</div><div class="label" style="color:#9A937F;">当日 PV</div></div>
+    <div><div class="num" style="color:#FB7185;">0.18%</div><div class="label" style="color:#9A937F;">错误率（醒目）</div></div>
+    <div class="stack" style="font-family:'PingFang SC','Microsoft YaHei',sans-serif;"><span class="t1">错误滚动流 · 最新 50 条（倒序）</span><span class="t2">TypeError: Cannot read properties of undefined (reading 'total')</span><span class="t3" style="color:#9A937F;">页面 /order/confirm · 今天 14:30</span></div>
+    <span class="btn" style="background:#F59E0B; color:#2E1D02; border-radius:2px;">主按钮</span>
+    <span class="btn" style="border:1px solid #F59E0B; color:#F59E0B; border-radius:2px;">次按钮</span>
+  </div>
+</div>
+
+<!-- 方案 C -->
+<div class="proposal" style="background:#0A0F1E; color:#E8EFFB;">
+  <div class="phead" style="color:#7D8CA6;"><b style="color:#E8EFFB;">方案 C · 冷辉电蓝</b><span>深蓝黑 #0A0F1E · 主色电蓝 · 适中 · 6px · 最低限编排</span></div>
+  <div class="swatches">
+    <div class="sw" style="background:#0A0F1E;">背景 #0A0F1E</div>
+    <div class="sw" style="background:#101828;">面板 #101828</div>
+    <div class="sw" style="background:#60A5FA; color:#071229;">主色 #60A5FA</div>
+    <div class="sw" style="background:#4ADE80; color:#05270F;">成功</div>
+    <div class="sw" style="background:#FACC15; color:"#332703;">警告</div>
+    <div class="sw" style="background:#F87171; color:#3D0606;">危险</div>
+  </div>
+  <div class="sample">
+    <div><div class="num" style="color:#60A5FA;">12,847</div><div class="label" style="color:#7D8CA6;">当日 PV</div></div>
+    <div><div class="num" style="color:#F87171;">0.18%</div><div class="label" style="color:#7D8CA6;">错误率（醒目）</div></div>
+    <div class="stack"><span class="t1">错误滚动流 · 最新 50 条（倒序）</span><span class="t2">TypeError: Cannot read properties of undefined (reading 'total')</span><span class="t3" style="color:#7D8CA6;">页面 /order/confirm · 今天 14:30</span></div>
+    <span class="btn" style="background:#60A5FA; color:#071229; border-radius:6px;">主按钮</span>
+    <span class="btn" style="border:1px solid #60A5FA; color:#60A5FA; border-radius:6px;">次按钮</span>
+  </div>
+</div>
+</body>
+</html>

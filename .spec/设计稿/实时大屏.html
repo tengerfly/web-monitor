@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>web-monitor 实时大屏</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <style>
+    
+
+    :root {
+      --color-primary: #60A5FA;
+      --color-primary-hover: #93C5FD;
+      --color-primary-subtle: rgba(96,165,250,0.12);
+      --color-accent: #22D3EE;
+      --color-bg: #0A0F1E;
+      --color-surface: #101828;
+      --color-surface-2: #16203A;
+      --color-text: #E8EFFB;
+      --color-text-secondary: #7D8CA6;
+      --color-text-tertiary: #55617A;
+      --color-border: #1E2A45;
+      --color-success: #4ADE80;
+      --color-success-subtle: rgba(74,222,128,0.12);
+      --color-warning: #FACC15;
+      --color-warning-subtle: rgba(250,204,21,0.10);
+      --color-danger: #F87171;
+      --color-danger-subtle: rgba(248,113,113,0.12);
+      --color-info: #60A5FA;
+      --color-info-subtle: rgba(96,165,250,0.12);
+      --font-family: 'Inter', "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 40px; --space-8: 48px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 10px; --radius-full: 999px;
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.35); --shadow-lg: 0 8px 28px rgba(0,0,0,0.45);
+      --motion-fade: 200ms ease-out; --motion-curve: 300ms ease; --motion-hover: 150ms;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: var(--font-family);
+    }
+
+    .font-number {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .text-h1 { font-size: 22px; font-weight: 600; line-height: 1.3; }
+    .text-h2 { font-size: 15px; font-weight: 600; line-height: 1.4; }
+    .text-h3 { font-size: 13px; font-weight: 600; line-height: 1.4; }
+    .text-body { font-size: 14px; font-weight: 400; line-height: 1.6; }
+    .text-caption { font-size: 12px; font-weight: 400; line-height: 1.5; }
+
+    @media (max-width: 1360px) {
+      .font-number { font-size: 32px; }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 200ms ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chart-path-primary {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 2;
+    }
+
+    .chart-area-primary {
+      fill: url(#gradient-primary);
+      fill-opacity: 0.1;
+    }
+
+    .chart-path-danger {
+      fill: none;
+      stroke: var(--color-danger);
+      stroke-width: 2;
+    }
+  @media (max-width: 1360px) {
+  .text-number { font-size: 32px !important; }
+}
+</style>
+</head>
+<body>
+  <div class="flex min-h-screen bg-[#0A0F1E] text-[#E8EFFB] overflow-hidden" data-sd-id="1">
+    
+    <!-- Left Sidebar: 200px -->
+    <aside class="w-[200px] bg-[#16203A] border-r border-[#1E2A45] flex flex-col z-40" data-sd-id="2">
+      <div class="p-6 flex items-center gap-2" data-sd-id="3">
+        <iconify-icon icon="lucide:activity" class="text-2xl text-[#60A5FA]"></iconify-icon>
+        <span class="text-h2 font-semibold tracking-tight" data-sd-id="4">web-monitor</span>
+      </div>
+      
+      <nav class="flex-1 px-2 py-4 space-y-1" data-sd-id="5">
+        <a id="nav-overview" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] hover:text-[#E8EFFB] transition-colors" data-sd-id="6">
+          <iconify-icon icon="lucide:layout-grid" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="7">总览</span>
+        </a>
+        <a id="nav-realtime" href="#" class="flex items-center px-3 h-10 rounded bg-[rgba(96,165,250,0.12)] text-[#60A5FA] relative" data-sd-id="8">
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#60A5FA]" data-sd-id="9"></div>
+          <iconify-icon icon="lucide:monitor" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1 font-semibold" data-sd-id="10">实时大屏</span>
+        </a>
+        <a id="nav-perf" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group transition-colors" data-sd-id="11">
+          <iconify-icon icon="lucide:zap" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="12">性能监控</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="13"></span>
+        </a>
+        <a id="nav-behavior" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group" data-sd-id="14">
+          <iconify-icon icon="lucide:mouse-pointer-2" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="15">行为分析</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="16"></span>
+        </a>
+        <a id="nav-error" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group" data-sd-id="17">
+          <iconify-icon icon="lucide:bug" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="18">错误与溯源</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="19"></span>
+        </a>
+        <a id="nav-session" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group" data-sd-id="20">
+          <iconify-icon icon="lucide:play-circle" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="21">会话回放</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="22"></span>
+        </a>
+        <a id="nav-user" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group" data-sd-id="23">
+          <iconify-icon icon="lucide:users" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="24">用户分析</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="25"></span>
+        </a>
+        <a id="nav-alert" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group" data-sd-id="26">
+          <iconify-icon icon="lucide:bell" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="27">告警管理</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="28"></span>
+        </a>
+        <a id="nav-setup" href="#" class="flex items-center px-3 h-10 rounded text-[#7D8CA6] hover:bg-[#93C5FD1f] group" data-sd-id="29">
+          <iconify-icon icon="lucide:plus-circle" class="mr-3 text-lg"></iconify-icon>
+          <span class="text-body flex-1" data-sd-id="30">应用接入</span>
+          <span class="w-[11px] h-[11px] bg-[#55617A] rounded-full" data-sd-id="31"></span>
+        </a>
+      </nav>
+
+      <div class="p-4 border-t border-[#1E2A45] flex items-center justify-between text-caption text-[#55617A]" data-sd-id="32">
+        <span data-sd-id="33">web-monitor 看板</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-[1080px] h-screen overflow-y-auto bg-[#0A0F1E] p-6 space-y-4 scrollbar-hide" data-sd-id="34">
+      
+      <!-- Panel A: App Switcher -->
+      <header class="flex items-center justify-between bg-[#101828] border border-[#1E2A45] rounded-md h-14 px-4 shrink-0 shadow-[0_4px_12px_rgba(0,0,0,0.35)]" data-sd-id="35">
+        <div class="flex items-center gap-4" data-sd-id="36">
+          <span class="text-caption text-[#7D8CA6]">监控应用</span>
+          <div class="relative flex items-center h-9 px-3 bg-[#16203A] border border-[#1E2A45] rounded min-w-[280px] cursor-pointer" data-sd-id="37">
+            <span class="text-body text-[#E8EFFB]" data-sd-id="38">演示商城（wm_demo00000001）</span>
+            <iconify-icon icon="lucide:chevron-down" class="ml-auto text-[#7D8CA6]"></iconify-icon>
+          </div>
+          <div class="flex items-center gap-2 text-caption text-[#7D8CA6]" data-sd-id="39">
+            <span data-sd-id="40">数据统计时点 <span class="text-[#E8EFFB] font-semibold" data-sd-id="41">14:32</span> 服务端时间</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2" data-sd-id="42">
+          <span class="flex items-center gap-1.5 px-2.5 py-1 bg-[rgba(74,222,128,0.12)] text-[#4ADE80] text-caption rounded-full font-semibold" data-sd-id="43">
+            <span class="w-1.5 h-1.5 bg-[#4ADE80] rounded-full " data-sd-id="44"></span>
+            正常更新中
+          </span>
+        </div>
+      </header>
+
+      <!-- Panel F: Alerts Banner -->
+      <section class="flex flex-col rounded-md overflow-hidden border border-[#F87171] bg-[rgba(248,113,113,0.12)]" data-sd-id="45">
+        <div class="bg-[#F87171] px-4 py-1.5 flex items-center gap-2 text-white" data-sd-id="46">
+          <iconify-icon icon="lucide:alert-triangle" class="text-lg"></iconify-icon>
+          <span class="text-h3" data-sd-id="47">告警 · 未恢复（滚动提示，点击定位到该告警）</span>
+        </div>
+        <div class="flex flex-col" data-sd-id="50">
+          <div class="px-4 py-3 border-b border-[#F87171]/20 hover:bg-[#F87171]/10 cursor-pointer flex justify-between items-center transition-colors relative" data-sd-id="51"><a id="alert-link-1" href="#alert-management" aria-label="新开视图查看该告警" class="absolute inset-0 z-10"></a>
+            <div class="flex flex-col gap-0.5" data-sd-id="52">
+              <span class="text-body font-bold text-[#F87171]" data-sd-id="53">错误率突增 · 命中指标 错误率</span>
+              <span class="text-caption text-[#7D8CA6]" data-sd-id="54">当前值（触发时）<span class="text-[#F87171]" data-sd-id="55">2.4%</span>（阈值 2%） · 触发于 14:20</span>
+            </div>
+            <iconify-icon icon="lucide:chevron-right" class="text-[#7D8CA6]"></iconify-icon>
+          </div>
+          <div class="px-4 py-3 hover:bg-[#F87171]/10 cursor-pointer flex justify-between items-center transition-colors relative" data-sd-id="56"><a id="alert-link-2" href="#alert-management" aria-label="新开视图查看该告警" class="absolute inset-0 z-10"></a>
+            <div class="flex flex-col gap-0.5" data-sd-id="57">
+              <span class="text-body font-bold text-[#F87171]" data-sd-id="58">接口错误率过高 · 接口错误率</span>
+              <span class="text-caption text-[#7D8CA6]" data-sd-id="59">当前值（触发时）<span class="text-[#F87171]" data-sd-id="60">5.1%</span>（阈值 5%） · 触发于 13:47</span>
+            </div>
+            <iconify-icon icon="lucide:chevron-right" class="text-[#7D8CA6]"></iconify-icon>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel B: Metric Cards (7 columns) -->
+      <section class="grid grid-cols-7 gap-3" data-sd-id="61">
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 hover:border-[#60A5FA] transition-colors duration-200 animate-fade-in" data-sd-id="62">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="63">当日 PV</span>
+          <div class="font-number" data-sd-id="64">12,847</div>
+        </div>
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 hover:border-[#60A5FA] transition-colors duration-200 animate-fade-in" data-sd-id="65">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="66">当日 UV</span>
+          <div class="font-number" data-sd-id="67">3,421</div>
+        </div>
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 hover:border-[#60A5FA] transition-colors duration-200 animate-fade-in" data-sd-id="68">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="69">错误数</span>
+          <div class="font-number" data-sd-id="70">23</div>
+        </div>
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 relative overflow-hidden group animate-fade-in" data-sd-id="71">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="72">错误率</span>
+          <div class="font-number text-[#E8EFFB]" data-sd-id="73">0.18%</div>
+        </div>
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 hover:border-[#60A5FA] transition-colors duration-200 animate-fade-in" data-sd-id="75">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="76">性能评分</span>
+          <div class="font-number" data-sd-id="77">86</div>
+        </div>
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 hover:border-[#60A5FA] transition-colors duration-200 animate-fade-in" data-sd-id="78">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="79">活跃会话</span>
+          <div class="font-number" data-sd-id="80">214</div>
+        </div>
+        <div class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 hover:border-[#60A5FA] transition-colors duration-200 animate-fade-in" data-sd-id="81">
+          <span class="text-caption text-[#7D8CA6] block mb-1" data-sd-id="82">接口成功率</span>
+          <div class="font-number text-[#4ADE80]" data-sd-id="83">99.6%</div>
+        </div>
+      </section>
+
+      <!-- Panel C: Real-time Trends -->
+      <section class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 flex flex-col gap-4 animate-fade-in" data-sd-id="84">
+        <div class="flex items-center justify-between" data-sd-id="85">
+          <h2 class="text-h2" data-sd-id="86">实时趋势 · 最近 60 分钟</h2>
+          <div class="flex items-center gap-4 text-caption text-[#7D8CA6]" data-sd-id="87">
+            <div class="flex items-center gap-1.5" data-sd-id="88">
+              <span class="w-2.5 h-0.5 bg-[#60A5FA]" data-sd-id="89"></span>
+              访问量
+            </div>
+            <div class="flex items-center gap-1.5" data-sd-id="90">
+              <span class="w-2.5 h-0.5 bg-[#F87171]" data-sd-id="91"></span>
+              错误数
+            </div>
+          </div>
+        </div>
+        <div class="h-[240px] w-full relative group" data-sd-id="92">
+          <svg viewBox="0 0 1000 200" class="w-full h-full preserve-3d" data-sd-id="93">
+            <defs>
+              <linearGradient id="gradient-primary" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.4"></stop>
+                <stop offset="100%" stop-color="#60A5FA" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            <!-- Grid Lines -->
+            <g stroke="#1E2A45" stroke-width="1">
+              <line x1="0" y1="40" x2="1000" y2="40"></line>
+              <line x1="0" y1="80" x2="1000" y2="80"></line>
+              <line x1="0" y1="120" x2="1000" y2="120"></line>
+              <line x1="0" y1="160" x2="1000" y2="160"></line>
+            </g>
+            <!-- PV Area & Line -->
+            <path class="chart-area-primary" d="M0,180 Q100,60 200,90 T400,100 T600,60 T800,80 T1000,50 L1000,200 L0,200 Z"></path>
+            <path class="chart-path-primary" d="M0,180 Q100,60 200,90 T400,100 T600,60 T800,80 T1000,50"></path>
+            <!-- Error Line -->
+            <path class="chart-path-danger" d="M0,195 Q100,185 200,190 T400,180 T600,195 T800,185 T1000,190" stroke-dasharray="4,2"></path>
+          </svg>
+          <div class="absolute bottom-[-10px] w-full flex justify-between px-2 text-caption text-[#55617A]" data-sd-id="94">
+            <span data-sd-id="95">13:32</span>
+            <span data-sd-id="96">13:42</span>
+            <span data-sd-id="97">13:52</span>
+            <span data-sd-id="98">14:02</span>
+            <span data-sd-id="99">14:12</span>
+            <span data-sd-id="100">14:22</span>
+            <span data-sd-id="101">14:32</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lower Grid: D, E, G -->
+      <div class="grid grid-cols-12 gap-4 flex-1 min-h-0" data-sd-id="102">
+        
+        <!-- Panel D: Error Stream -->
+        <section class="col-span-7 bg-[#101828] border border-[#1E2A45] rounded-md flex flex-col animate-fade-in" data-sd-id="103">
+          <div class="p-4 border-b border-[#1E2A45] flex items-center justify-between" data-sd-id="104">
+            <h2 class="text-h2" data-sd-id="105">错误滚动流 · 最新 50 条（倒序）</h2>
+          </div>
+          <div class="flex-1 overflow-y-auto scrollbar-hide" data-sd-id="107">
+            <!-- Error Item 1 -->
+            <div class="px-4 py-3 border-b border-[#1E2A45] hover:bg-[rgba(96,165,250,0.12)] cursor-pointer group relative" data-sd-id="108"><a id="err-link-1" href="#error-detail-view" aria-label="新开视图查看该错误详情" class="absolute inset-0 z-10"></a>
+              <div class="flex items-center gap-2 mb-1" data-sd-id="109">
+                <span class="text-[#F87171] font-bold text-body" data-sd-id="110">接口错误</span>
+                <span class="px-1.5 py-0.5 bg-[rgba(248,113,113,0.12)] text-[#F87171] text-[12px] rounded" data-sd-id="111">新</span>
+                <span class="text-caption text-[#7D8CA6] ml-auto" data-sd-id="112">14:31</span>
+              </div>
+              <div class="flex items-center justify-between text-body gap-2" data-sd-id="113">
+                <div class="truncate flex-1 text-[#E8EFFB]" data-sd-id="114">
+                  /api/pay/create 返回 500
+                </div>
+                <button type="button" aria-label="展开完整错误消息" class="relative z-20 text-[#60A5FA] text-caption hover:underline shrink-0" data-sd-id="115">查看完整</button>
+                  <div class="hidden group-first:block text-caption text-[#7D8CA6] mt-1 bg-[#0A0F1E] border border-dashed border-[#1E2A45] rounded p-2" data-sd-id="115b">/api/pay/create 返回 500（完整消息示例：POST https://api.demo-mall.cn/v1/pay/create 上游网关 502 → 500，traceId 8f3a…c21）</div>
+              </div>
+              <div class="text-caption text-[#60A5FA] mt-1 flex items-center gap-1" data-sd-id="116">
+                <iconify-icon icon="lucide:link-2" class="text-xs"></iconify-icon>
+                /pay
+              </div>
+            </div>
+            <!-- Error Item 2 -->
+            <div class="px-4 py-3 border-b border-[#1E2A45] hover:bg-[rgba(96,165,250,0.12)] cursor-pointer group relative" data-sd-id="117"><a id="err-link-2" href="#error-detail-view" aria-label="新开视图查看该错误详情" class="absolute inset-0 z-10"></a>
+              <div class="flex items-center gap-2 mb-1" data-sd-id="118">
+                <span class="text-[#F87171] font-bold text-body" data-sd-id="119">JS 错误</span>
+                <span class="text-caption text-[#7D8CA6] ml-auto" data-sd-id="120">14:30</span>
+              </div>
+              <div class="flex items-center justify-between text-body gap-2" data-sd-id="121">
+                <div class="truncate flex-1 text-[#E8EFFB]" data-sd-id="122">
+                  TypeError: Cannot read properties of undefined (reading 'total')
+                </div>
+                <button class="text-[#60A5FA] text-caption hover:underline shrink-0" data-sd-id="123">查看完整</button>
+              </div>
+              <div class="text-caption text-[#60A5FA] mt-1" data-sd-id="124">/order/confirm</div>
+            </div>
+            <!-- Error Item 3 -->
+            <div class="px-4 py-3 border-b border-[#1E2A45] hover:bg-[rgba(96,165,250,0.12)] cursor-pointer group relative" data-sd-id="125"><a id="err-link-3" href="#error-detail-view" aria-label="新开视图查看该错误详情" class="absolute inset-0 z-10"></a>
+              <div class="flex items-center gap-2 mb-1" data-sd-id="126">
+                <span class="text-[#F87171] font-bold text-body" data-sd-id="127">JS 错误</span>
+                <span class="text-caption text-[#7D8CA6] ml-auto" data-sd-id="128">14:26</span>
+              </div>
+              <div class="flex items-center justify-between text-body gap-2" data-sd-id="129">
+                <div class="truncate flex-1 text-[#E8EFFB]" data-sd-id="130">
+                  未捕获 Promise：Timeout waiting for inventory
+                </div>
+                <button class="text-[#60A5FA] text-caption hover:underline shrink-0" data-sd-id="131">查看完整</button>
+              </div>
+              <div class="text-caption text-[#60A5FA] mt-1" data-sd-id="132">/seckill</div>
+            </div>
+            <!-- Error Item 4 -->
+            <div class="px-4 py-3 border-b border-[#1E2A45] hover:bg-[rgba(96,165,250,0.12)] cursor-pointer group relative" data-sd-id="133"><a id="err-link-4" href="#error-detail-view" aria-label="新开视图查看该错误详情" class="absolute inset-0 z-10"></a>
+              <div class="flex items-center gap-2 mb-1" data-sd-id="134">
+                <span class="text-[#F87171] font-bold text-body" data-sd-id="135">资源错误</span>
+                <span class="text-caption text-[#7D8CA6] ml-auto" data-sd-id="136">14:21</span>
+              </div>
+              <div class="flex items-center justify-between text-body gap-2" data-sd-id="137">
+                <div class="truncate flex-1 text-[#E8EFFB]" data-sd-id="138">
+                  静态资源 404：/static/js/chunk-vendor.js
+                </div>
+                <button class="text-[#60A5FA] text-caption hover:underline shrink-0" data-sd-id="139">查看完整</button>
+              </div>
+              <div class="text-caption text-[#60A5FA] mt-1" data-sd-id="140">/login</div>
+            </div>
+            <!-- Error Item 5 -->
+            <div class="px-4 py-3 border-b border-[#1E2A45] hover:bg-[rgba(96,165,250,0.12)] cursor-pointer group relative" data-sd-id="141"><a id="err-link-5" href="#error-detail-view" aria-label="新开视图查看该错误详情" class="absolute inset-0 z-10"></a>
+              <div class="flex items-center gap-2 mb-1" data-sd-id="142">
+                <span class="text-[#F87171] font-bold text-body" data-sd-id="143">JS 错误</span>
+                <span class="text-caption text-[#7D8CA6] ml-auto" data-sd-id="144">14:15</span>
+              </div>
+              <div class="flex items-center justify-between text-body gap-2" data-sd-id="145">
+                <div class="truncate flex-1 text-[#E8EFFB]" data-sd-id="146">
+                  ReferenceError: tracker is not defined
+                </div>
+                <button class="text-[#60A5FA] text-caption hover:underline shrink-0" data-sd-id="147">查看完整</button>
+              </div>
+              <div class="text-caption text-[#60A5FA] mt-1" data-sd-id="148">/user/center</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Split: E & G -->
+        <div class="col-span-5 flex flex-col gap-4 min-h-0" data-sd-id="149">
+          
+          <!-- Panel E: Top 榜 -->
+          <section class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 animate-fade-in" data-sd-id="150">
+            <h2 class="text-h2 mb-4" data-sd-id="151">Top 榜</h2>
+            <div class="grid grid-cols-3 gap-4" data-sd-id="152">
+              <!-- Sub list 1 -->
+              <div class="flex flex-col gap-2" data-sd-id="153">
+                <h3 class="text-h3 text-[#7D8CA6] pb-1 border-b border-[#1E2A45] mb-1" data-sd-id="154">慢接口 Top5</h3>
+                <div class="flex items-center text-caption" data-sd-id="910"><span class="w-4 text-[#55617A]" data-sd-id="911">1</span><span class="truncate flex-1 px-1" data-sd-id="912">/api/order/list</span><span class="font-semibold text-[#E8EFFB]" data-sd-id="913">1,842ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="920"><span class="w-4 text-[#55617A]" data-sd-id="921">2</span><span class="truncate flex-1 px-1" data-sd-id="922">/api/goods/search</span><span class="font-semibold" data-sd-id="923">1,236ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="930"><span class="w-4 text-[#55617A]" data-sd-id="931">3</span><span class="truncate flex-1 px-1" data-sd-id="932">/api/user/profile</span><span class="font-semibold" data-sd-id="933">980ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="940"><span class="w-4 text-[#55617A]" data-sd-id="941">4</span><span class="truncate flex-1 px-1" data-sd-id="942">/api/cart/items</span><span class="font-semibold" data-sd-id="943">756ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="950"><span class="w-4 text-[#55617A]" data-sd-id="951">5</span><span class="truncate flex-1 px-1" data-sd-id="952">/api/comment/page</span><span class="font-semibold" data-sd-id="953">640ms</span></div>
+              </div>
+              <!-- Sub list 2 -->
+              <div class="flex flex-col gap-2" data-sd-id="167">
+                <h3 class="text-h3 text-[#7D8CA6] pb-1 border-b border-[#1E2A45] mb-1" data-sd-id="168">JS 错误 Top5</h3>
+                <div class="flex items-center text-caption" data-sd-id="910"><span class="w-4 text-[#55617A]" data-sd-id="911">1</span><span class="truncate flex-1 px-1" data-sd-id="912">TypeError …'total'</span><span class="font-semibold text-[#F87171]" data-sd-id="913">18 次</span></div>
+<div class="flex items-center text-caption" data-sd-id="920"><span class="w-4 text-[#55617A]" data-sd-id="921">2</span><span class="truncate flex-1 px-1" data-sd-id="922">Promise Timeout</span><span class="font-semibold" data-sd-id="923">11 次</span></div>
+<div class="flex items-center text-caption" data-sd-id="930"><span class="w-4 text-[#55617A]" data-sd-id="931">3</span><span class="truncate flex-1 px-1" data-sd-id="932">ReferenceError</span><span class="font-semibold" data-sd-id="933">7 次</span></div>
+<div class="flex items-center text-caption" data-sd-id="940"><span class="w-4 text-[#55617A]" data-sd-id="941">4</span><span class="truncate flex-1 px-1" data-sd-id="942">资源 404</span><span class="font-semibold" data-sd-id="943">5 次</span></div>
+<div class="flex items-center text-caption" data-sd-id="950"><span class="w-4 text-[#55617A]" data-sd-id="951">5</span><span class="truncate flex-1 px-1" data-sd-id="952">SyntaxError</span><span class="font-semibold" data-sd-id="953">2 次</span></div>
+              </div>
+              <!-- Sub list 3 -->
+              <div class="flex flex-col gap-2" data-sd-id="181">
+                <h3 class="text-h3 text-[#7D8CA6] pb-1 border-b border-[#1E2A45] mb-1" data-sd-id="182">最差页面 Top5</h3>
+                <div class="flex items-center text-caption" data-sd-id="910"><span class="w-4 text-[#55617A]" data-sd-id="911">1</span><span class="truncate flex-1 px-1" data-sd-id="912">/seckill</span><span class="font-semibold text-[#F87171]" data-sd-id="913">4,200ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="920"><span class="w-4 text-[#55617A]" data-sd-id="921">2</span><span class="truncate flex-1 px-1" data-sd-id="922">/order/confirm</span><span class="font-semibold" data-sd-id="923">3,100ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="930"><span class="w-4 text-[#55617A]" data-sd-id="931">3</span><span class="truncate flex-1 px-1" data-sd-id="932">/report/chart</span><span class="font-semibold" data-sd-id="933">2,600ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="940"><span class="w-4 text-[#55617A]" data-sd-id="941">4</span><span class="truncate flex-1 px-1" data-sd-id="942">/login</span><span class="font-semibold" data-sd-id="943">1,900ms</span></div>
+<div class="flex items-center text-caption" data-sd-id="950"><span class="w-4 text-[#55617A]" data-sd-id="951">5</span><span class="truncate flex-1 px-1" data-sd-id="952">/home</span><span class="font-semibold" data-sd-id="953">1,700ms</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Panel G: Core Vitals -->
+          <section class="bg-[#101828] border border-[#1E2A45] rounded-md p-4 flex-1 animate-fade-in" data-sd-id="195">
+            <h2 class="text-h2 mb-6" data-sd-id="196">Core Vitals 达标率</h2>
+            <div class="flex items-center justify-around" data-sd-id="197">
+              <!-- Circle 1 -->
+              <div class="flex flex-col items-center gap-2" data-sd-id="198">
+                <div class="relative w-16 h-16" data-sd-id="199">
+                  <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90" data-sd-id="200">
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#1E2A45" stroke-width="2"></circle>
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#60A5FA" stroke-width="2.5" stroke-dasharray="92, 100" stroke-linecap="round"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center text-body font-bold" data-sd-id="201">92%</div>
+                </div>
+                <span class="text-caption text-[#7D8CA6]" data-sd-id="202">LCP</span>
+              </div>
+              <!-- Circle 2 -->
+              <div class="flex flex-col items-center gap-2" data-sd-id="203">
+                <div class="relative w-16 h-16" data-sd-id="204">
+                  <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90" data-sd-id="205">
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#1E2A45" stroke-width="2"></circle>
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#60A5FA" stroke-width="2.5" stroke-dasharray="88, 100" stroke-linecap="round"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center text-body font-bold" data-sd-id="206">88%</div>
+                </div>
+                <span class="text-caption text-[#7D8CA6]" data-sd-id="207">INP</span>
+              </div>
+              <!-- Circle 3 -->
+              <div class="flex flex-col items-center gap-2" data-sd-id="208">
+                <div class="relative w-16 h-16" data-sd-id="209">
+                  <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90" data-sd-id="210">
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#1E2A45" stroke-width="2"></circle>
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#60A5FA" stroke-width="2.5" stroke-dasharray="96, 100" stroke-linecap="round"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center text-body font-bold" data-sd-id="211">96%</div>
+                </div>
+                <span class="text-caption text-[#7D8CA6]" data-sd-id="212">CLS</span>
+              </div>
+              
+              <div class="w-px h-16 bg-[#1E2A45] mx-2" data-sd-id="213"></div>
+
+              <!-- Circle Total -->
+              <div class="flex flex-col items-center gap-2" data-sd-id="214">
+                <div class="relative w-20 h-20" data-sd-id="215">
+                  <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90" data-sd-id="216">
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#1E2A45" stroke-width="3"></circle>
+                    <circle cx="18" cy="18" r="16" fill="none" stroke="#60A5FA" stroke-width="4" stroke-dasharray="90, 100" stroke-linecap="round"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center text-h2 font-bold text-[#60A5FA]" data-sd-id="217">90%</div>
+                </div>
+                <span class="text-caption font-semibold text-[#E8EFFB]" data-sd-id="218">综合达标率</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</body></html>

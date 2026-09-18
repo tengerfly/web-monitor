@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实时大屏 · web-monitor 看板（低保真原型）</title>
+<style>
+:root {
+  --c-bg: #f7f7f8;
+  --c-surface: #ffffff;
+  --c-border: #e5e5e6;
+  --c-text: #1f1f1f;
+  --c-text-2: #6b6b6b;
+  --c-primary: #0f766e;
+  --c-primary-weak: #e6f2f1;
+  --c-danger: #dc2626;
+  --c-danger-weak: #fdecec;
+  --c-warn: #b45309;
+  --c-warn-weak: #fef3e2;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--c-bg); color: var(--c-text); font-size: 14px; }
+a { color: var(--c-primary); text-decoration: none; }
+.frame { display: flex; min-height: 100vh; }
+/* 左侧导航（看板常规框架保留） */
+.sidebar { width: 180px; background: var(--c-surface); border-right: 1px solid var(--c-border); padding: 16px 0; flex-shrink: 0; }
+.sidebar .logo { font-weight: 600; padding: 0 16px 12px; border-bottom: 1px solid var(--c-border); margin-bottom: 8px; }
+.sidebar .item { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; color: var(--c-text-2); }
+.sidebar .item .tag { font-size: 11px; color: var(--c-text-2); border: 1px solid var(--c-border); border-radius: 3px; padding: 0 4px; }
+.sidebar .item.active { color: var(--c-primary); background: var(--c-primary-weak); font-weight: 600; }
+.sidebar .item.active .tag { border-color: var(--c-primary); color: var(--c-primary); }
+/* 主区 */
+.main { flex: 1; padding: 16px 20px; min-width: 0; }
+.row { display: flex; gap: 12px; margin-bottom: 12px; }
+.grow { flex: 1; min-width: 0; }
+.card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 6px; padding: 12px 14px; }
+.card h3 { font-size: 13px; color: var(--c-text-2); font-weight: 500; margin-bottom: 10px; }
+.zonetitle { display: flex; justify-content: space-between; align-items: baseline; }
+/* 区块A 应用切换区 */
+.ctrl { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.ctrl label { color: var(--c-text-2); }
+.ctrl select { padding: 5px 8px; border: 1px solid var(--c-border); border-radius: 4px; background: var(--c-surface); font-size: 14px; }
+.clock { font-size: 13px; color: var(--c-text-2); }
+.clock b { color: var(--c-text); font-size: 15px; }
+.status-ok { color: var(--c-primary); font-size: 13px; }
+.status-fail { color: var(--c-danger); font-size: 13px; font-weight: 600; }
+.failbanner { display: none; margin: 0 0 12px; padding: 10px 14px; background: var(--c-danger-weak); border: 1px solid var(--c-danger); border-radius: 6px; color: var(--c-danger); font-size: 13px; }
+.failbanner.show { display: block; }
+/* 区块F 告警横幅 */
+.alerts { display: none; margin-bottom: 12px; border: 1px solid var(--c-danger); border-radius: 6px; background: var(--c-surface); overflow: hidden; }
+.alerts.show { display: block; }
+.alerts .ahead { background: var(--c-danger); color: #fff; font-size: 12px; padding: 4px 12px; font-weight: 600; }
+.alert-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid var(--c-border); font-size: 13px; }
+.alert-item:hover { background: var(--c-danger-weak); }
+.alert-item .rule { font-weight: 600; color: var(--c-danger); }
+.alert-item .meta { color: var(--c-text-2); }
+/* 区块B 指标卡 */
+.kpis { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 12px; }
+.kpi { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 6px; padding: 12px; text-align: center; }
+.kpi .name { font-size: 12px; color: var(--c-text-2); }
+.kpi .val { font-size: 24px; font-weight: 700; margin-top: 4px; }
+.kpi.bad .val { color: var(--c-danger); }
+.kpi .sub { font-size: 11px; color: var(--c-text-2); margin-top: 2px; }
+/* 区块C 趋势 */
+.legend { font-size: 12px; color: var(--c-text-2); display: flex; gap: 14px; }
+.legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 4px; }
+/* 区块D 错误流 */
+.errlist { display: flex; flex-direction: column; }
+.err-item { display: block; position: relative; padding: 8px 64px 8px 6px; border-top: 1px solid var(--c-border); color: var(--c-text); border-radius: 4px; }
+.err-item:first-child { border-top: none; }
+.err-item:hover { background: var(--c-primary-weak); }
+.err-item .err-link { display: block; color: var(--c-text); }
+.err-item .l1 { display: flex; justify-content: space-between; gap: 8px; }
+.err-item .type { font-weight: 600; }
+.err-item .type.err { color: var(--c-danger); }
+.err-item .time { color: var(--c-text-2); font-size: 12px; white-space: nowrap; }
+.err-item .msgrow { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+.err-item .msg { color: var(--c-text-2); font-size: 13px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.err-item .toggle-full { position: absolute; right: 6px; bottom: 8px; font-size: 12px; background: none; border: none; color: var(--c-primary); cursor: pointer; padding: 2px 4px; font-family: inherit; }
+.err-item .page { font-size: 12px; color: var(--c-primary); margin-top: 2px; }
+.badge-new { display: inline-block; font-size: 11px; color: #fff; background: var(--c-danger); border-radius: 3px; padding: 0 4px; margin-left: 6px; }
+.err-item .full { display: none; margin-top: 4px; font-size: 12px; color: var(--c-text-2); background: var(--c-bg); border: 1px dashed var(--c-border); border-radius: 4px; padding: 6px; word-break: break-all; white-space: normal; }
+.appfail { display: none; margin: 0 0 12px; padding: 10px 14px; background: var(--c-warn-weak); border: 1px solid var(--c-warn); border-radius: 6px; color: var(--c-warn); font-size: 13px; }
+.appfail.show { display: block; }
+.vring { display: inline-block; vertical-align: middle; margin-right: 6px; }
+.loadtag { display: none; color: var(--c-primary); font-size: 13px; }
+.loadtag.show { display: inline; }
+#screenBody.loading .card { opacity: 0.45; }
+/* 区块E Top榜 */
+.toplist { list-style: none; }
+.toplist li { display: flex; align-items: baseline; gap: 6px; padding: 6px 2px; border-top: 1px solid var(--c-border); font-size: 13px; }
+.toplist li:first-child { border-top: none; }
+.toplist .n { color: var(--c-text-2); width: 14px; flex-shrink: 0; }
+.toplist .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--c-text); }
+.toplist .v { color: var(--c-text); font-weight: 600; flex-shrink: 0; }
+/* 区块G 达标率 */
+.vitals { display: flex; justify-content: space-around; align-items: center; text-align: center; }
+.vital .ring { font-size: 18px; font-weight: 700; color: var(--c-primary); }
+.vital .name { font-size: 12px; color: var(--c-text-2); margin-top: 2px; }
+.vital-overall { border-left: 1px dashed var(--c-border); padding-left: 16px; }
+.zonestate { display: none; padding: 18px; text-align: center; color: var(--c-text-2); font-size: 13px; }
+.zonestate.show { display: block; }
+.zone.failed-zone { border-color: var(--c-warn); }
+.zfail { display: none; color: var(--c-warn); font-size: 12px; }
+.failed-zone .zfail { display: inline; }
+/* 空态整页 */
+.empty-app { display: none; padding: 80px 0; text-align: center; }
+.empty-app h2 { font-size: 18px; margin-bottom: 10px; }
+.empty-app p { color: var(--c-text-2); margin-bottom: 18px; }
+.empty-app .btn { display: inline-block; background: var(--c-primary); color: #fff; padding: 8px 18px; border-radius: 4px; }
+/* 原型状态模拟器 */
+.sim { position: fixed; right: 16px; bottom: 16px; width: 250px; background: var(--c-surface); border: 1px dashed var(--c-text-2); border-radius: 6px; padding: 10px 12px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 50; }
+.sim b { display: block; margin-bottom: 6px; }
+.sim select, .sim label { width: 100%; margin-bottom: 6px; }
+.sim select { padding: 4px; border: 1px solid var(--c-border); border-radius: 4px; }
+.sim .note { color: var(--c-text-2); margin-top: 4px; }
+.dimmed { opacity: 0.55; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <!-- 看板常规框架：左侧导航保留（壳层关系见 PRD overview §6.1） -->
+  <aside class="sidebar">
+    <div class="logo">web-monitor 看板</div>
+    <div class="item">总览 <span class="tag">存量页</span></div>
+    <div class="item active">实时大屏 <span class="tag">当前</span></div>
+    <div class="item">性能监控 <span class="tag">存量页</span></div>
+    <div class="item">行为分析 <span class="tag">存量页</span></div>
+    <div class="item">错误与溯源 <span class="tag">存量页</span></div>
+    <div class="item">会话回放 <span class="tag">存量页</span></div>
+    <div class="item">用户分析 <span class="tag">存量页</span></div>
+    <div class="item">告警管理 <span class="tag">存量页</span></div>
+    <div class="item">应用接入 <span class="tag">存量页</span></div>
+  </aside>
+
+  <main class="main">
+    <!-- 平台无应用空态（AC-M02-008） -->
+    <div class="empty-app" id="emptyApp">
+      <h2>还没有接入应用</h2>
+      <p>接入第一个前端应用后，即可在这里实时查看它的线上健康度。</p>
+      <a class="btn" href="access-guide-placeholder.html">去接入应用</a>
+    </div>
+
+    <div id="screenBody">
+      <!-- 区块A 应用切换区 -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="ctrl">
+          <label>监控应用</label>
+          <select id="appSelect">
+            <option value="demo">演示商城（wm_demo00000001）</option>
+            <option value="site">企业官网（wm_web00000002）</option>
+          </select>
+          <span class="clock">数据统计时点 <b id="clock">14:32</b> 服务端时间</span>
+          <span class="status-ok" id="statusOk">● 正常更新中</span>
+          <span class="status-fail" id="statusFail" style="display:none;">✕ 更新失败（自动重试中）</span>
+          <span class="loadtag" id="loadTag">加载中…</span>
+        </div>
+      </div>
+
+      <!-- 更新失败横幅（AC-M02-007 / AC-M02-013） -->
+      <div class="failbanner" id="failBanner"></div>
+
+      <!-- 应用被删提示（E-06 / AC-M02-011） -->
+      <div class="appfail" id="appFailBanner">该应用不可用（可能已被删除）。请在上方切换到其他应用继续观察。</div>
+
+      <!-- 区块F 告警横幅（仅未恢复告警；无未恢复告警整体隐藏） -->
+      <div class="alerts show" id="alertBanner">
+        <div class="ahead">告警 · 未恢复（滚动提示，点击定位到该告警）</div>
+        <a class="alert-item" href="alert-placeholder.html" target="_blank" rel="noopener">
+          <span><span class="rule">错误率突增</span> · 命中指标 错误率 · 当前值（触发时）2.4%（阈值 2%）</span>
+          <span class="meta">触发于 14:20</span>
+        </a>
+        <a class="alert-item" href="alert-placeholder.html" target="_blank" rel="noopener">
+          <span><span class="rule">接口错误率过高</span> · 命中指标 接口错误率 · 当前值（触发时）5.1%（阈值 5%）</span>
+          <span class="meta">触发于 13:47</span>
+        </a>
+      </div>
+
+      <!-- 区块B 核心指标卡区 -->
+      <div class="kpis" id="kpis"></div>
+
+      <div class="row">
+        <!-- 区块C 实时趋势区 -->
+        <div class="card grow" style="flex:1.6;">
+          <div class="zonetitle"><h3>实时趋势 · 最近 60 分钟</h3>
+            <span class="legend"><span><i style="background:var(--c-primary)"></i>访问量</span><span><i style="background:var(--c-danger)"></i>错误数</span></span>
+          </div>
+          <svg id="trend" viewBox="0 0 600 160" width="100%" height="160" preserveAspectRatio="none">
+            <line x1="0" y1="130" x2="600" y2="130" stroke="var(--c-border)" stroke-width="1"/>
+            <polyline id="trendPv" fill="none" stroke="var(--c-primary)" stroke-width="2"/>
+            <polyline id="trendErr" fill="none" stroke="var(--c-danger)" stroke-width="2"/>
+          </svg>
+          <div class="zonestate" id="trendEmpty">暂无数据——该应用尚未产生上报</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- 区块D 错误滚动流区 -->
+        <div class="card grow" style="flex:1.5;">
+          <div class="zonetitle"><h3>错误滚动流 · 最新 50 条（倒序）</h3><span class="zfail">该区块本轮更新失败</span></div>
+          <div class="errlist" id="errList"></div>
+          <div class="zonestate" id="errEmpty">暂无错误数据——该应用尚未产生上报</div>
+        </div>
+
+        <div class="grow" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- 区块E Top 榜区 -->
+          <div class="card" id="topZone">
+            <div class="zonetitle"><h3>Top 榜</h3><span class="zfail">该区块本轮更新失败</span></div>
+            <div class="row" style="margin-bottom:0;">
+              <div class="grow"><h3 style="font-size:12px;">慢接口 Top5</h3><ul class="toplist" id="topApi"></ul></div>
+              <div class="grow"><h3 style="font-size:12px;">JS 错误 Top5</h3><ul class="toplist" id="topErr"></ul></div>
+              <div class="grow"><h3 style="font-size:12px;">最差页面 Top5</h3><ul class="toplist" id="topPage"></ul></div>
+            </div>
+          </div>
+          <!-- 区块G 达标率区 -->
+          <div class="card" id="vitalZone">
+            <div class="zonetitle"><h3>Core Vitals 达标率</h3><span class="zfail">该区块本轮更新失败</span></div>
+            <div class="vitals" id="vitals"></div>
+            <div class="zonestate" id="vitalEmpty">无性能样本——达标率暂不可算</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 原型状态模拟器（非产品功能，仅演示各状态） -->
+<div class="sim">
+  <b>原型状态模拟器（非产品功能）</b>
+  <select id="simState">
+    <option value="normal">正常更新中</option>
+    <option value="fail">更新失败（有过成功数据）</option>
+    <option value="firstfail">首次加载失败（从未成功）</option>
+    <option value="partial">部分类目失败</option>
+    <option value="nodata">应用无数据（空态）</option>
+    <option value="appdeleted">应用被删（该应用不可用）</option>
+    <option value="noapp">平台无任何应用</option>
+  </select>
+  <label><input type="checkbox" id="simPause"> 暂停自动更新演示</label>
+  <div class="note">自动更新演示：每 6 秒推进一轮（时点刷新、错误流新增并高亮一轮）。</div>
+</div>
+
+<script>
+/* ---------- 数据（演示商城 / 企业官网 / 无数据零值） ---------- */
+var DATA = {
+  demo: {
+    kpi: [
+      { name: '当日 PV', val: '12,847' }, { name: '当日 UV', val: '3,421' },
+      { name: '错误数', val: '23' }, { name: '错误率', val: '0.18%', bad: true },
+      { name: '性能评分', val: '86' }, { name: '活跃会话', val: '214' }, { name: '接口成功率', val: '99.6%' }
+    ],
+    vitals: [ { name: 'LCP', v: 92 }, { name: 'INP', v: 88 }, { name: 'CLS', v: 96 } ],
+    vitalOverall: 90,
+    errors: [
+      { type: '接口错误', msg: '/api/pay/create 返回 500', page: '/pay', time: '14:31' },
+      { type: 'JS 错误', msg: "TypeError: Cannot read properties of undefined (reading 'total')", page: '/order/confirm', time: '14:30' },
+      { type: 'JS 错误', msg: '未捕获 Promise：Timeout waiting for inventory', page: '/seckill', time: '14:26' },
+      { type: '资源错误', msg: '静态资源 404：/static/js/chunk-vendor.js', page: '/login', time: '14:21' },
+      { type: 'JS 错误', msg: 'ReferenceError: tracker is not defined', page: '/user/center', time: '14:15' },
+      { type: '接口错误', msg: '/api/comment/page 返回 502', page: '/goods/detail', time: '14:02' }
+    ],
+    topApi: [['/api/order/list', '1,842ms'], ['/api/goods/search', '1,236ms'], ['/api/user/profile', '980ms'], ['/api/cart/items', '756ms'], ['/api/comment/page', '640ms']],
+    topErr: [["TypeError …'total'", '18 次'], ['Promise Timeout', '11 次'], ['ReferenceError', '7 次'], ['资源 404', '5 次'], ['SyntaxError', '2 次']],
+    topPage: [['/seckill', '4,200ms'], ['/order/confirm', '3,100ms'], ['/report/chart', '2,600ms'], ['/login', '1,900ms'], ['/home', '1,700ms']]
+  },
+  site: {
+    kpi: [
+      { name: '当日 PV', val: '3,204' }, { name: '当日 UV', val: '987' },
+      { name: '错误数', val: '4' }, { name: '错误率', val: '0.12%' },
+      { name: '性能评分', val: '91' }, { name: '活跃会话', val: '58' }, { name: '接口成功率', val: '99.9%' }
+    ],
+    vitals: [ { name: 'LCP', v: 96 }, { name: 'INP', v: 93 }, { name: 'CLS', v: 98 } ],
+    vitalOverall: 95,
+    errors: [
+      { type: '资源错误', msg: '静态资源 404：/static/img/banner.webp', page: '/home', time: '13:58' },
+      { type: 'JS 错误', msg: "TypeError: Cannot read properties of null (reading 'src')", page: '/about', time: '13:41' }
+    ],
+    topApi: [['/api/news/list', '920ms'], ['/api/banner/all', '610ms'], ['/api/footer/links', '430ms']],
+    topErr: [['TypeError …null', '2 次'], ['资源 404', '2 次']],
+    topPage: [['/about', '2,100ms'], ['/home', '1,600ms'], ['/news', '1,200ms']]
+  },
+  nodata: {
+    kpi: [
+      { name: '当日 PV', val: '0' }, { name: '当日 UV', val: '0' },
+      { name: '错误数', val: '0' }, { name: '错误率', val: '0%' },
+      { name: '性能评分', val: '—' }, { name: '活跃会话', val: '0' }, { name: '接口成功率', val: '—' }
+    ],
+    vitals: [], vitalOverall: null, errors: [], topApi: [], topErr: [], topPage: []
+  }
+};
+/* ---------- 渲染 ---------- */
+var clockMin = 32, clockHour = 14, autoNewIndex = -1;
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function render(appKey) {
+  var d = DATA[appKey];
+  var kpis = document.getElementById('kpis');
+  kpis.innerHTML = d.kpi.map(function (k) {
+    return '<div class="kpi' + (k.bad ? ' bad' : '') + '"><div class="name">' + k.name + '</div><div class="val">' + k.val + '</div></div>';
+  }).join('');
+  var errList = document.getElementById('errList');
+  errList.innerHTML = d.errors.map(function (e, i) {
+    var isNew = i === 0 && autoNewIndex === 0 ? '<span class="badge-new">新</span>' : '';
+    return '<div class="err-item">' +
+      '<a class="err-link" href="error-detail-placeholder.html" target="_blank" rel="noopener">' +
+      '<div class="l1"><span class="type err">' + e.type + isNew + '</span><span class="time">今天 ' + e.time + '</span></div>' +
+      '<div class="msg">' + e.msg + '</div>' +
+      '<div class="page">页面 ' + e.page + '</div></a>' +
+      '<div class="full">' + e.msg + '</div>' +
+      '<button type="button" class="toggle-full" onclick="toggleFull(this)">查看完整</button></div>';
+  }).join('');
+  errList.style.display = d.errors.length ? 'flex' : 'none';
+  var ie = document.getElementById('errEmpty');
+  ie.textContent = appKey === 'nodata' ? '暂无错误数据——该应用尚未产生上报' : '暂无错误数据——该应用尚未产生上报';
+  ie.classList.toggle('show', !d.errors.length);
+  fillList('topApi', d.topApi); fillList('topErr', d.topErr); fillList('topPage', d.topPage);
+  var vitals = document.getElementById('vitals');
+  vitals.innerHTML = d.vitals.map(function (v) {
+    return '<div class="vital"><svg class="vring" width="34" height="34" viewBox="0 0 36 36">' +
+      '<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--c-border)" stroke-width="4"/>' +
+      '<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--c-primary)" stroke-width="4" pathLength="100" stroke-dasharray="' + v.v + ' 100" transform="rotate(-90 18 18)"/>' +
+      '</svg><div class="ring">' + v.v + '%</div><div class="name">' + v.name + '</div></div>';
+  }).join('');
+  if (d.vitalOverall !== null) {
+    vitals.innerHTML += '<div class="vital vital-overall"><svg class="vring" width="34" height="34" viewBox="0 0 36 36">' +
+      '<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--c-border)" stroke-width="4"/>' +
+      '<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--c-primary)" stroke-width="4" pathLength="100" stroke-dasharray="' + d.vitalOverall + ' 100" transform="rotate(-90 18 18)"/>' +
+      '</svg><div class="ring">' + d.vitalOverall + '%</div><div class="name">综合达标率</div></div>';
+  }
+  drawTrend(appKey);
+}
+function fillList(id, rows) {
+  document.getElementById(id).innerHTML = rows.length
+    ? rows.map(function (r, i) {
+      return '<li><span class="n">' + (i + 1) + '</span><span class="grow">' + r[0] + '</span><span class="v">' + r[1] + '</span></li>';
+    }).join('')
+    : '<li style="color:var(--c-text-2);">暂无数据</li>';
+}
+function toggleFull(el) {
+  var full = el.parentNode.querySelector('.full');
+  full.style.display = full.style.display === 'block' ? 'none' : 'block';
+}
+/* 趋势（低保真 SVG 折线示意：60 点，与 PRD A2 口径一致） */
+function drawTrend(appKey) {
+  var empty = document.getElementById('trendEmpty');
+  if (appKey === 'nodata') {
+    setLine('trendPv', []); setLine('trendErr', []);
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+  var seed = appKey === 'demo' ? 1 : 2, pv = [], err = [], i;
+  for (i = 0; i < 60; i++) {
+    pv.push(120 - Math.abs(Math.sin((i + seed) / 5)) * 70 - (i % 7) * 3);
+    err.push(126 + Math.abs(Math.sin((i + seed * 2) / 4)) * 8);
+  }
+  setLine('trendPv', pv); setLine('trendErr', err);
+}
+function setLine(id, ys) {
+  var pts = ys.map(function (y, i) { return (i * (600 / 59)).toFixed(1) + ',' + y.toFixed(1); }).join(' ');
+  document.getElementById(id).setAttribute('points', pts);
+}
+/* ---------- 状态模拟 ---------- */
+var simState = document.getElementById('simState');
+var appSelect = document.getElementById('appSelect');
+function setClock(text) { document.getElementById('clock').textContent = text; }
+function applyState() {
+  var s = simState.value;
+  var noapp = s === 'noapp', appDeleted = s === 'appdeleted';
+  var firstFail = s === 'firstfail', failed = s === 'fail' || firstFail, partial = s === 'partial', noData = s === 'nodata';
+  document.getElementById('emptyApp').style.display = noapp ? 'block' : 'none';
+  document.getElementById('screenBody').style.display = noapp ? 'none' : 'block';
+  document.getElementById('appFailBanner').className = 'appfail' + (appDeleted ? ' show' : '');
+  // 应用被删：保留最后数据并降透明度，突出提示与切换引导
+  document.getElementById('screenBody').classList.toggle('dimmed', appDeleted);
+  // 状态标识
+  document.getElementById('statusOk').style.display = (failed || appDeleted) ? 'none' : 'inline';
+  document.getElementById('statusFail').style.display = (failed && !firstFail) ? 'inline' : 'none';
+  document.getElementById('loadTag').classList.remove('show');
+  // 数据源：nodata 用零值数据集，其余按所选应用
+  render(noData ? 'nodata' : appSelect.value);
+  // 更新失败横幅
+  var fb = document.getElementById('failBanner');
+  fb.className = 'failbanner' + (failed ? ' show' : '');
+  fb.innerHTML = firstFail
+    ? '✕ 首次加载失败：暂无已加载数据（无历史统计时点）。正在自动重试，成功后将自动呈现各区块。'
+    : '✕ 数据更新失败：以下内容为最后成功数据。最后成功统计时点 <b>' + pad(clockHour) + ':' + pad(clockMin) + '</b> 服务端时间。自动重试中，恢复后将自动刷新，无需手动操作。';
+  // 统计时点位（PR-03：首次失败无历史时点）
+  setClock(firstFail ? '暂无已加载数据' : pad(clockHour) + ':' + pad(clockMin));
+  // 零值态与异常态严格区分（PR-02/PR-04）
+  document.getElementById('kpis').style.display = firstFail ? 'none' : 'grid';
+  var showEmptyErr = firstFail || !DATA[noData ? 'nodata' : appSelect.value].errors.length;
+  document.getElementById('errList').style.display = showEmptyErr ? 'none' : 'flex';
+  var ee = document.getElementById('errEmpty');
+  ee.textContent = firstFail ? '暂无已加载数据' : '暂无错误数据——该应用尚未产生上报';
+  ee.classList.toggle('show', showEmptyErr);
+  var vz = document.getElementById('vitalZone');
+  vz.className = 'card' + (partial ? ' failed-zone' : '');
+  var vitals = document.getElementById('vitals');
+  var ve = document.getElementById('vitalEmpty');
+  vitals.style.display = (firstFail || partial || noData) ? 'none' : 'flex';
+  ve.textContent = firstFail ? '暂无已加载数据' : (partial ? '该区块本轮更新失败，数据已置空' : '无性能样本——达标率暂不可算');
+  ve.classList.toggle('show', firstFail || partial || noData);
+  // 边缘态整体降透明（topZone 统一处理，PR-11）
+  document.getElementById('topZone').classList.toggle('dimmed', firstFail);
+  // 告警横幅：无未恢复告警/未加载数据时隐藏
+  document.getElementById('alertBanner').className = 'alerts' + ((firstFail || noData) ? '' : ' show');
+}
+/* ---------- 自动更新演示（REQ-M02-004：定时器常驻，失败/无数据等态自行短路） ---------- */
+var timer = setInterval(nextRound, 6000);
+function nextRound() {
+  if (document.getElementById('simPause').checked) return;
+  if (['fail', 'firstfail', 'appdeleted', 'nodata', 'noapp'].indexOf(simState.value) >= 0) return;
+  clockMin = (clockMin + 1) % 60; if (clockMin === 0) clockHour = (clockHour + 1) % 24;
+  setClock(pad(clockHour) + ':' + pad(clockMin));
+  autoNewIndex = 0;
+  var appKey = appSelect.value, d = DATA[appKey];
+  d.errors.unshift({ type: 'JS 错误', msg: "TypeError: Cannot read properties of undefined (reading '" + ['total', 'items', 'config'][clockMin % 3] + "')", page: '/order/confirm', time: pad(clockHour) + ':' + pad(clockMin) });
+  if (d.errors.length > 50) d.errors.pop(); // 容量 50
+  render(appKey); applyState();
+  setTimeout(function () { autoNewIndex = -1; if (simState.value === 'normal') { render(appSelect.value); applyState(); } }, 2500);
+}
+appSelect.addEventListener('change', function () {
+  autoNewIndex = -1;
+  // 切换过渡：保留旧数据 + 加载中反馈，随后整体替换并刷新时点（PR-09/PR-10）
+  document.getElementById('loadTag').classList.add('show');
+  document.getElementById('screenBody').classList.add('loading');
+  clockMin = (clockMin + 1) % 60; if (clockMin === 0) clockHour = (clockHour + 1) % 24;
+  setTimeout(function () {
+    document.getElementById('screenBody').classList.remove('loading');
+    document.getElementById('loadTag').classList.remove('show');
+    if (simState.value !== 'nodata') setClock(pad(clockHour) + ':' + pad(clockMin));
+    render(simState.value === 'nodata' ? 'nodata' : appSelect.value);
+    applyState();
+  }, 500);
+});
+simState.addEventListener('change', applyState);
+render('demo'); applyState();
+</script>
+</body>
+</html>

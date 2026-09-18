@@ -45,3 +45,6 @@ sourcemaps/
 .cache/
 .turbo/
 .eslintcache
+
+# Superdesign 工作目录（非交付物）
+.superdesign/
