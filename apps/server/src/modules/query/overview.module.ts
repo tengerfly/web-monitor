@@ -4,8 +4,8 @@ import type { OverviewMetrics, OverviewResult, TrendPoint } from '@web-monitor/t
 import { ClickHouseService } from '../../storage/clickhouse.service';
 import { buildBaseFilter, parseTimeRange, type RawQuery, type TimeRange } from '../../common/query';
 
-/** 性能评分：与 @web-monitor/performance 的 computeScore 口径一致 */
-function computeScore(metrics: Partial<OverviewMetrics>): number {
+/** 性能评分：与 @web-monitor/performance 的 computeScore 口径一致（实时大屏模块复用） */
+export function computeScore(metrics: Partial<OverviewMetrics>): number {
   const weights: Array<[keyof OverviewMetrics, number, number | undefined, boolean]> = [
     ['avgLcp', 0.3, 2500, false],
     ['avgInp', 0.25, 200, false],

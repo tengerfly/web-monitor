@@ -19,6 +19,16 @@ export interface AppConfig {
     from: string;
   };
   alertCheckInterval: number;
+  realtime: {
+    /** SSE 推送周期（毫秒） */
+    pushIntervalMs: number;
+    /** 推送失败后客户端重连基础退避（毫秒，指数递增） */
+    retryBaseMs: number;
+    /** 重连退避上限（毫秒） */
+    retryMaxMs: number;
+    /** 全局 SSE 连接上限（背压，超出返回 503） */
+    maxClients: number;
+  };
 }
 
 const toBool = (value: string | undefined, fallback = false): boolean => {
@@ -46,4 +56,10 @@ export default (): AppConfig => ({
     from: process.env.ALERT_MAIL_FROM || 'web-monitor <no-reply@example.com>',
   },
   alertCheckInterval: Number(process.env.ALERT_CHECK_INTERVAL || 60),
+  realtime: {
+    pushIntervalMs: Number(process.env.REALTIME_PUSH_INTERVAL_MS || 5_000),
+    retryBaseMs: Number(process.env.REALTIME_RETRY_BASE_MS || 10_000),
+    retryMaxMs: Number(process.env.REALTIME_RETRY_MAX_MS || 60_000),
+    maxClients: Number(process.env.REALTIME_MAX_CLIENTS || 200),
+  },
 });

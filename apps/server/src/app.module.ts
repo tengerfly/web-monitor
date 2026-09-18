@@ -18,6 +18,7 @@ import { SessionsQueryModule } from './modules/query/sessions.module';
 import { SourceMapModule } from './modules/sourcemap/sourcemap.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { HealthModule } from './modules/health/health.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { HealthModule } from './modules/health/health.module';
     SourceMapModule,
     AlertsModule,
     HealthModule,
+    RealtimeModule,
   ],
   providers: [
     PrismaService,
