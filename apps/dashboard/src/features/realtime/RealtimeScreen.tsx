@@ -55,7 +55,12 @@ export default function RealtimeScreen() {
     () => (snapshot?.errors ?? []).map((error) => error.fingerprint),
     [snapshot?.errors],
   );
-  const newFingerprints = usePrevFingerprints(fingerprints);
+  const { prev: prevFingerprints, initialized: fingerprintBaselineReady } = usePrevFingerprints(fingerprints);
+  // 「新」= 当前帧存在而上一轮不存在的条目；首帧只建基线不标新（A12）
+  const newFingerprints = useMemo(
+    () => (fingerprintBaselineReady ? new Set(fingerprints.filter((fp) => !prevFingerprints.has(fp))) : new Set<string>()),
+    [fingerprintBaselineReady, fingerprints, prevFingerprints],
+  );
   const hotKeys = useMemo(() => computeHotKeys((snapshot?.alerts.unresolved ?? []).map((item) => item.metric)), [
     snapshot?.alerts.unresolved,
   ]);

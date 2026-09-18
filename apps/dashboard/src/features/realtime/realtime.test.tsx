@@ -52,6 +52,14 @@ describe('实时大屏区块渲染（TC-M02 ↔ AC-M02-003/006/007/009/012/013�
     expect(screen.getByLabelText(/新开视图查看错误详情/)).toBeTruthy();
   });
 
+  it('TC-M02-012b 新徽标仅在新增 fingerprint 上展示（A12）', () => {
+    const first = render(<ErrorStream errors={[errorItem]} newFingerprints={new Set(['fp-1'])} emptyText="暂无" />);
+    expect(screen.getByText('新')).toBeTruthy();
+    first.unmount();
+    render(<ErrorStream errors={[errorItem]} newFingerprints={new Set()} emptyText="暂无" />);
+    expect(screen.queryByText('新')).toBeNull();
+  });
+
   it('TC-M02-005 空错误流按正常态文案展示', () => {
     render(<ErrorStream errors={[]} newFingerprints={new Set()} emptyText="暂无错误数据——该应用尚未产生上报" />);
     expect(screen.getByText('暂无错误数据——该应用尚未产生上报')).toBeTruthy();
