@@ -25,6 +25,7 @@ import type {
 import { PrismaService } from '../../storage/prisma.service';
 import { ClickHouseService } from '../../storage/clickhouse.service';
 import { buildBaseFilter, type RawQuery, type TimeRange } from '../../common/query';
+import { SseResponse } from '../../common/http';
 import { computeScore } from '../query/overview.module';
 import type { AppConfig } from '../../config/configuration';
 
@@ -34,6 +35,10 @@ const CATEGORIES = ['metrics', 'trend', 'errors', 'topLists', 'alerts', 'vitals'
 /** Core Vitals「良好」阈值（沿用存量总览口径） */
 const VITAL_GOOD: Record<'LCP' | 'INP' | 'CLS', number> = { LCP: 2500, INP: 200, CLS: 0.1 };
 
+/** SSE 心跳间隔（秒）：低于常见反向代理 60s 读超时 */
+const HEARTBEAT_INTERVAL_MS = 15_000;
+/** 背压 503 的建议重试等待（秒，经 Retry-After 头下发） */
+const BACKPRESSURE_RETRY_AFTER_S = 10;
 /** 错误流容量（PRD M01 §5 规则 3） */
 const ERROR_STREAM_LIMIT = 50;
 /** 未恢复告警供数上限（设计假设 A11） */
@@ -432,12 +437,13 @@ export class ScreenStreamController {
     this.retryBaseMs = realtime.retryBaseMs;
   }
 
+  @SseResponse()
   @Sse(':appKey/stream')
   stream(@Param('appKey') appKey: string): Observable<MessageEvent> {
     // 背压：连接数达上限时在建流前拒绝（503 + Retry-After 由客户端按 retry 语义退避）
     if (this.activeConnections.size >= this.maxClients) {
       throw new HttpException(
-        { code: 'REALTIME_CLIENT_LIMIT', message: '实时连接数已达上限' },
+        { code: 'REALTIME_CLIENT_LIMIT', message: '实时连接数已达上限', retryAfter: BACKPRESSURE_RETRY_AFTER_S },
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
@@ -461,7 +467,7 @@ export class ScreenStreamController {
           error: (error) => subscriber.error(error),
         });
       // 15s 心跳保活（代理/网关读超时通常 60s）
-      const heartbeat = interval(15_000).subscribe(() => {
+      const heartbeat = interval(HEARTBEAT_INTERVAL_MS).subscribe(() => {
         try {
           subscriber.next({ type: 'ping', data: 'ping' });
         } catch {

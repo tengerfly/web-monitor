@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { HttpException, type MessageEvent } from '@nestjs/common';
+import { of, firstValueFrom } from 'rxjs';
+import { ResponseInterceptor, SseResponse } from '../../common/http';
 import {
   RealtimeSnapshotService,
   ScreenStreamController,
@@ -268,6 +270,29 @@ describe('ScreenStreamController', () => {
       });
     });
     expect((error as HttpException).getResponse()).toMatchObject({ code: 'REALTIME_APP_NOT_FOUND' });
+  });
+
+  it('CR-B-01 SSE 帧经 ResponseInterceptor 透传（保留 event 类型，不再二次包装）', async () => {
+    const interceptor = new ResponseInterceptor(new (class {
+      getAllAndOverride = vi.fn(() => true);
+    })() as never);
+    const frame = { type: 'snapshot', data: { appKey: 'demo' } };
+    const handler = { handle: () => frame } as never;
+    const context = {
+      getHandler: () => ({}),
+      getClass: () => ({}),
+    } as never;
+    const result = interceptor.intercept(context, handler);
+    expect(result).toBe(frame);
+    // 元数据缺省时（常规 REST）仍走包装
+    const interceptorPlain = new ResponseInterceptor(new (class {
+      getAllAndOverride = vi.fn(() => false);
+    })() as never);
+    const resultPlain = (await firstValueFrom(
+      interceptorPlain.intercept(context, { handle: () => of({ appKey: 'demo' }) } as never),
+    )) as { code: number };
+    expect(resultPlain.code).toBe(0);
+    void SseResponse;
   });
 
   it('背压：连接数达 maxClients → 503 REALTIME_CLIENT_LIMIT', () => {
