@@ -12,7 +12,7 @@
 ## 二、本次路径
 | 起点 | 终点 | 计划节点序列 | 跳过节点 | 当前节点 |
 |---|---|---|---|---|
-| ② PRD 设计 | ⑭ 测试 | ②→③→④→⑤→⑥→⑦→⑧→⑩-后→⑨→⑩-前→⑪→⑬-后→⑫→⑬-前→⑭ | 暂无 | ⑬-后 代码评审（后端） |
+| ② PRD 设计 | ⑭ 测试 | ②→③→④→⑤→⑥→⑦→⑧→⑩-后→⑨→⑩-前→⑪→⑬-后→⑫→⑬-前→⑭ | 暂无 | ⑭ 测试 |
 
 ## 三、进度
 | # | 节点 | 调用 Skill | 状态 | 门禁轮次 | 门禁结果 | 产物路径 | 更新时间 |
@@ -28,7 +28,10 @@
 | ⑨ | 前端技术方案 | Frontend-Tech-Design | 已完成 | - | - | `.spec/FTDD/V1/`（overview + 01_RealtimePage） | 2026-09-18 |
 | ⑩-前 | 技术方案评审（前端） | Tech-Review | 已完成 | 2 | 已放行 | `.spec/技术方案评审/`（前端评审） | 2026-09-18 |
 | ⑪ | 后端开发 | Backend-Dev | 已完成 | - | - | `apps/server/src/modules/realtime/`（3 commits） | 2026-09-18 |
-| ⑬-后 | 代码评审（后端） | Code-Review | 进行中 | 0 | - | `.spec/代码评审/` | 2026-09-18 |
+| ⑬-后 | 代码评审（后端） | Code-Review | 已完成 | 2 | 已放行 | `.spec/代码评审/`（后端评审 + 任务清单） | 2026-09-18 |
+| ⑫ | 前端开发 | Frontend-Dev | 已完成 | - | - | `apps/dashboard/src/features/realtime/`（commit d55fb30 + 修正） | 2026-09-18 |
+| ⑬-前 | 代码评审（前端∥还原度） | Code-Review ∥ Fidelity-Review | 已完成 | 2 | 已放行 | `.spec/代码评审/`（前端评审 + screenshots） | 2026-09-18 |
+| ⑭ | 测试 | Testing | 进行中 | - | - | `.spec/测试/` | 2026-09-18 |
 | ⑩-后 | 技术方案评审（后端） | Tech-Review | 未开始 | 0 | - | `.spec/技术方案评审/` | - |
 | ⑨ | 前端技术方案 | Frontend-Tech-Design | 未开始 | - | - | `.spec/FTDD/V1/` | - |
 | ⑩-前 | 技术方案评审（前端） | Tech-Review | 未开始 | 0 | - | `.spec/技术方案评审/` | - |
@@ -92,6 +95,21 @@
 - 给下游输入：⑦ UI-UX-Review 审 `实时大屏.html` v2 对照 design-system + PRD；⑨ FTDD §8.6 登记 34 条 token；⑫ Frontend-Dev 视觉唯一来源 = design-system.md + 实时大屏.html
 - 额度消耗：6.5 credits（create-design-draft）；直编 0；变体未启用
 - 已知解读备查：存量页徽标→圆点；错误曲线虚线（规范未定线型）
+
+### 7. ⑪+⑬-后 后端开发与代码评审（2026-09-18）
+- 执行 Skill：Backend-Dev（FP1 types 契约 / FP2 RealtimeModule / FP3 vitest 15 用例 / FP4 注册+env+构建）+ Code-Review ⑬-后（主上下文独立评审，通道偏差延续）
+- 产出物：`packages/types/src/realtime.ts`（契约）、`apps/server/src/modules/realtime/realtime.module.ts`（SSE/REST/TTL 缓存/背压）、`realtime.module.spec.ts`（15/15）、配置与 env；commits 04bc83b / 3f95d5c / 753dfcc / 评审修复 commit
+- 评审：P0×1（SSE 帧被全局拦截器二次包装）/ P1×2（字符串错误码退化、Retry-After 缺失）→ 全修复（SseResponse 元数据跳过 + 过滤器字符串码透传 + Retry-After 落头）→ 复核放行（15/15 + typecheck + lint + build 全绿）
+- 给下游输入：⑫ Frontend-Dev 读 FTDD（SSE 消费/状态机/token 34 条）+ types 契约 + 设计稿 v4
+- 门禁闭环：轮次 2 · 已放行 · 沉淀（当场改：Backend-Dev 错误表 +1 行 + CONTEXT D-36｜Code-Review patterns +1「流式响应被全局拦截器二次包装」）
+- 工程坑记录：apps/server tsconfig incremental + 过期 tsbuildinfo → nest build 静默空产物（处置见 .spec/PROJECT.md）
+
+### 8. ⑫+⑬-前 前端开发与代码评审（2026-09-18）
+- 执行 Skill：Frontend-Dev（theme.css 34 token 对账、useRealtimeStream 状态机、9 组件、路由/菜单接线、vitest+RTL 15 用例）+ Code-Review ⑬-前 ∥ Fidelity-Review（双开截图比对）
+- 产出物：`apps/dashboard/src/features/realtime/`（RealtimeScreen + components/blocks·TrendPanel·VitalsRing + hooks×2 + api + theme.css）+ 路由 `/realtime` + 菜单项 + mock-realtime-server.mjs（无 DB 联调工具）；commit d55fb30 + 修正
+- 评审：P0×0 / P1×0 / P2×4（注记保留）；Fidelity 结论=还原度达标（设计稿 v4 ↔ 实现页，截图存证）；开发期双开比对捕获并修复 3 处（趋势双层嵌套/图例双份/指标枚举未映射中文名）
+- 给下游输入：⑭ 测试——全量验证命令与覆盖边界见 `.spec/代码评审/前端代码评审.md` §5
+- 门禁闭环：轮次 2 · 已放行 · 沉淀判定：无 P0/P1，P2 为个案不反哺 skill
 
 ## 五、遗留问题
 门禁未清即放行（强制放行）或 P2 留后续的问题逐条列出：编号 / 问题 / 等级 / 出处 / 后续处理。
