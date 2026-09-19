@@ -24,6 +24,8 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/throttler": "^6.3.0",
     "@prisma/client": "^6.2.1",
+    "@server-log/core": "link:../../../server-log/packages/core",
+    "@server-log/nestjs": "link:../../../server-log/packages/nestjs",
     "@web-monitor/types": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

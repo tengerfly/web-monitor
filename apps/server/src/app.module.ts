@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { LogErrorInterceptor, LogModule } from '@server-log/nestjs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import configuration from './config/configuration';
 import { PrismaService } from './storage/prisma.service';
@@ -30,6 +31,8 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
         limit: 600,
       },
     ]),
+    // server-log 统一日志：请求上下文中间件 + 内置 Logger 桥接（级别走 SERVER_LOG_LEVEL）
+    LogModule.forRoot({ category: 'web-monitor' }),
     IngestModule,
     ProjectsModule,
     RemoteConfigModule,
@@ -46,6 +49,8 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
   providers: [
     PrismaService,
     ClickHouseService,
+    // 异常日志拦截在外层（先记录后由 ResponseInterceptor/AllExceptionsFilter 整形）
+    { provide: APP_INTERCEPTOR, useClass: LogErrorInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
   ],
