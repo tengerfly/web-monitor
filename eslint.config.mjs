@@ -38,4 +38,18 @@ export default tseslint.config(
       globals: { process: 'readonly', console: 'readonly', module: 'writable' },
     },
   },
+  {
+    // Node 直跑的 ESM 脚本（mock 实时服务）：URL/定时器/console 为 Node 内置全局
+    files: ['apps/server/mock-realtime-server.mjs'],
+    languageOptions: {
+      globals: { URL: 'readonly', setInterval: 'readonly', clearInterval: 'readonly', console: 'readonly' },
+    },
+  },
+  {
+    // 测试证据脚本（Node ≥18 直跑的 ESM）：fetch/TextDecoder 为 Node 内置全局
+    files: ['**/.spec/**/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', fetch: 'readonly', TextDecoder: 'readonly', process: 'readonly' },
+    },
+  },
 );

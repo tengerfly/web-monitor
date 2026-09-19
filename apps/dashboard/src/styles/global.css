@@ -58,7 +58,7 @@
 .wm-code-block {
   background: #f7f8fa;
   border: 1px solid #e5e6eb;
-  border-radius: 6px;
+  border-radius: 4px; /* 统一规范两档制：控件档 4px */
   padding: 12px;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 12px;

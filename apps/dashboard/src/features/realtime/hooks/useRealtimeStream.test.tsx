@@ -1,7 +1,7 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RealtimeScreenSnapshot } from '@web-monitor/types';
-import { useRealtimeStream } from './useRealtimeStream';
+import { FRAME_STALE_TIMEOUT_MS, useRealtimeStream } from './useRealtimeStream';
 
 /** 可控的 EventSource 测试替身：手工驱动 snapshot 帧与 error */
 class FakeEventSource {
@@ -110,6 +110,67 @@ describe('useRealtimeStream 状态机（TC-M02 ↔ AC-M02-004/007/010/013）', (
     expect(result.current.phase).toBe('interrupted');
     expect(result.current.everSucceeded).toBe(true);
     expect(result.current.snapshot?.metrics.pv).toBe(100);
+  });
+
+  it('AC-M02-007 帧停达看门狗：live 后超时无新帧 → interrupted 且启动 REST 兜底（半开连接无 error 事件）', async () => {
+    const fetcher = vi.fn(async () => makeSnapshot({ metrics: { pv: 7, uv: 3, errorCount: 0, errorRate: 0, score: 90, activeSessions: 1, apiSuccessRate: 1 } }));
+    const { result } = render('wm_demo00000001', fetcher);
+    const source = instances[0];
+    await act(async () => source.emitSnapshot(makeSnapshot()));
+    expect(result.current.phase).toBe('live');
+    expect(fetcher).not.toHaveBeenCalled();
+    // 静置超过帧新鲜度阈值（3 × 推送周期 5s）无任何新帧 → 与 error 路径同语义翻转 interrupted
+    await act(async () => {
+      vi.advanceTimersByTime(FRAME_STALE_TIMEOUT_MS + 1);
+    });
+    expect(result.current.phase).toBe('interrupted');
+    expect(result.current.everSucceeded).toBe(true);
+    expect(result.current.snapshot?.metrics.pv).toBe(100); // 保留旧快照 + 最后成功时点
+    // 兜底轮询下一周期拉到新快照 → 自愈回 live
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(fetcher).toHaveBeenCalled();
+    expect(result.current.phase).toBe('live');
+    expect(result.current.snapshot?.metrics.pv).toBe(7);
+  });
+
+  it('AC-M02-007 看门狗判中断后 SSE 新帧到达 → 回 live 且兜底轮询停止', async () => {
+    const fetcher = vi.fn(async () => makeSnapshot());
+    const { result } = render('wm_demo00000001', fetcher);
+    const source = instances[0];
+    await act(async () => source.emitSnapshot(makeSnapshot()));
+    await act(async () => {
+      vi.advanceTimersByTime(FRAME_STALE_TIMEOUT_MS + 1);
+    });
+    expect(result.current.phase).toBe('interrupted');
+    // EventSource 自动重连成功、新帧到达 → 回 live（任何新帧都重置新鲜度）
+    await act(async () =>
+      source.emitSnapshot(makeSnapshot({ generatedAt: '2026-09-18T14:40:00', metrics: { pv: 200, uv: 50, errorCount: 1, errorRate: 0.01, score: 95, activeSessions: 10, apiSuccessRate: 1 } })),
+    );
+    expect(result.current.phase).toBe('live');
+    expect(result.current.snapshot?.metrics.pv).toBe(200);
+    // SSE 已恢复供帧：兜底轮询被停止（推进一个轮询周期不再拉取、也不误翻 interrupted）
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(result.current.phase).toBe('live');
+  });
+
+  it('AC-M02-007 帧按推送周期（5s）持续到达 → 看门狗按帧重置不误报', async () => {
+    const fetcher = vi.fn(async () => makeSnapshot());
+    const { result } = render('wm_demo00000001', fetcher);
+    const source = instances[0];
+    await act(async () => source.emitSnapshot(makeSnapshot()));
+    for (let tick = 0; tick < 4; tick += 1) {
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      await act(async () => source.emitSnapshot(makeSnapshot()));
+    }
+    expect(result.current.phase).toBe('live');
+    expect(fetcher).not.toHaveBeenCalled(); // 全程未误触发兜底轮询
   });
 
   it('AC-M02-013 首帧超时且从未成功 → interrupted（无时点语义）并启动 REST 兜底', async () => {

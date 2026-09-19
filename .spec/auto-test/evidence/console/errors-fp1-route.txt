@@ -1,0 +1,66 @@
+- complementary:
+  - strong: web-monitor
+  - generic: 前端监控平台
+  - menu:
+    - menuitem "dashboard 总览":
+      - img "dashboard":
+      - link "总览":
+        - /url: /overview
+    - menuitem "dot-chart 实时大屏":
+      - img "dot-chart":
+      - link "实时大屏":
+        - /url: /realtime
+    - menuitem "area-chart 性能分析":
+      - img "area-chart":
+      - link "性能分析":
+        - /url: /performance
+    - menuitem "bug 错误与溯源":
+      - img "bug":
+      - link "错误与溯源":
+        - /url: /errors
+    - menuitem "bars 用户行为":
+      - img "bars":
+      - link "用户行为":
+        - /url: /behavior
+    - menuitem "api 会话与回放":
+      - img "api":
+      - link "会话与回放":
+        - /url: /sessions
+    - menuitem "user 用户细查":
+      - img "user":
+      - link "用户细查":
+        - /url: /users
+    - menuitem "setting 应用管理":
+      - img "setting":
+      - link "应用管理":
+        - /url: /projects
+    - menuitem "alert 告警管理":
+      - img "alert":
+      - link "告警管理":
+        - /url: /alerts
+    - menuitem "team 接入指南":
+      - img "team":
+      - link "接入指南":
+        - /url: /connect
+- banner:
+  - combobox
+  - generic "演示商城（wm_demo00000001）"
+  - combobox
+  - generic: 全部环境
+  - combobox
+  - generic "最近 24 小时"
+  - textbox "开始日期"
+  - generic "to":
+    - img "swap-right":
+  - textbox "结束日期"
+  - img "calendar":
+  - generic: 演示商城
+  - button "reload":
+    - img "reload":
+- main:
+  - img "暂无数据"
+  - generic: 未找到该错误分组
+- img "close-circle":
+- generic: ok
+- img "close-circle":
+- generic: ok

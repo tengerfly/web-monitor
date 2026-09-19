@@ -1,0 +1,121 @@
+web-monitor
+前端监控平台
+总览
+实时大屏
+性能分析
+错误与溯源
+用户行为
+会话与回放
+用户细查
+应用管理
+告警管理
+接入指南
+演示商城（wm_demo00000001）
+全部环境
+最近 24 小时
+演示商城
+监控应用
+演示商城（wm_demo00000001）
+企业官网（wm_web00000002）
+数据统计时点 00:29 服务端时间
+正常更新中
+告警 · 未恢复（滚动提示，点击定位到该告警）
+错误率突增 · 命中指标 错误率 · 当前值（触发时） 2.4%（阈值 2%）
+触发于 08:17
+当日 PV
+12,847
+当日 UV
+3,421
+错误数
+23
+错误率
+0.18%
+性能评分
+86
+活跃会话
+214
+接口成功率
+99.6%
+实时趋势 · 最近 60 分钟
+访问量
+错误数
+错误滚动流 · 最新 50 条（倒序）
+接口错误
+今天 08:24
+/api/pay/create 返回 500
+页面 /pay
+查看完整
+JS 错误
+今天 08:19
+TypeError: Cannot read properties of undefined (reading 'total')
+页面 /order/confirm
+查看完整
+JS 错误
+今天 08:14
+未捕获 Promise：Timeout waiting for inventory
+页面 /seckill
+查看完整
+资源错误
+今天 08:09
+静态资源 404：/static/js/chunk-vendor.js
+页面 /login
+查看完整
+JS 错误
+今天 08:04
+ReferenceError: tracker is not defined
+页面 /user/center
+查看完整
+Top 榜
+慢接口 Top5
+1
+/api/order/list
+1,842ms
+2
+/api/goods/search
+1,236ms
+3
+/api/user/profile
+980ms
+4
+/api/cart/items
+756ms
+5
+/api/comment/page
+640ms
+JS 错误 Top5
+1
+TypeError …'total'
+18 次
+2
+Promise Timeout
+11 次
+3
+ReferenceError
+7 次
+4
+资源 404
+5 次
+5
+SyntaxError
+2 次
+最差页面 Top5
+1
+/seckill
+4,200ms
+2
+/order/confirm
+3,100ms
+3
+/report/chart
+2,600ms
+4
+/login
+1,900ms
+5
+/home
+1,700ms
+Core Vitals 达标率
+LCP 92%
+INP 88%
+CLS 96%
+综合达标率 90%

@@ -49,7 +49,7 @@
 ## 4. 圆角与阴影
 | Token | 值 | 用途 |
 |---|---|---|
-| `--radius-sm / -md / -lg / -full` | `4 / 6 / 10px / 999px` | 标签/输入 / 卡片按钮 / 弹层 / 胶囊 |
+| `--radius-sm / -md / -lg / -full` | `4 / 8 / 8px / 999px` | 标签/输入（4 控件档）/ 卡片按钮、弹层（8 容器档，md=lg 同值）/ 胶囊 |
 | `--shadow-md / -lg` | `0 4px 12px rgba(0,0,0,0.35)` / `0 8px 28px rgba(0,0,0,0.45)` | 悬浮 / 弹层（克制，深色底弱阴影） |
 
 ## 5. 组件规范
@@ -108,7 +108,7 @@ SVG 环形：底环 `--color-border`、进度环 `--color-primary`（pathLength 
 | 25 | --font-caption | 12px/400/1.5 |
 | 26 | --font-family | Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif |
 | 27 | --space-1..8 | 4/8/12/16/24/32/40/48px |
-| 28 | --radius-sm/-md/-lg/-full | 4/6/10px/999px |
+| 28 | --radius-sm/-md/-lg/-full | 4/8/8px/999px（统一规范两档制，2026-09-19 修订） |
 | 29 | --shadow-md | 0 4px 12px rgba(0,0,0,0.35) |
 | 30 | --shadow-lg | 0 8px 28px rgba(0,0,0,0.45) |
 | 31 | --motion-fade | 200ms ease-out |
